@@ -25,7 +25,10 @@ def _app():
         raise FaceBackendUnavailable(
             "insightface is not installed; image similarity is disabled (pip install insightface)"
         ) from exc
-    app = FaceAnalysis(name="buffalo_l", providers=["CPUExecutionProvider"])
+    app = FaceAnalysis(
+        name=config.FACE_MODEL, allowed_modules=["detection", "recognition"],
+        providers=["CPUExecutionProvider"],
+    )
     app.prepare(ctx_id=-1, det_size=(320, 320))
     return app
 
