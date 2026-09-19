@@ -11,6 +11,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{(DATA_DIR / 'traceai.db').
 
 # "insightface" (ArcFace) is the intended backend; "none" disables image scoring.
 FACE_BACKEND = os.getenv("TRACEAI_FACE_BACKEND", "insightface")
+# buffalo_l (ArcFace R50, ~280 MB) is the accurate default; buffalo_sc (~15 MB) suits slow links.
+FACE_MODEL = os.getenv("TRACEAI_FACE_MODEL", "buffalo_l")
 TEXT_EMBED_MODEL = os.getenv("TRACEAI_TEXT_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 API_URL = os.getenv("TRACEAI_API_URL", "http://localhost:8000")
