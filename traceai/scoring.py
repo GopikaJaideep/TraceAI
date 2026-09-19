@@ -43,17 +43,17 @@ def proximity_component(
     person_lat: float, person_lng: float, last_seen_at: datetime,
     lat: float | None, lng: float | None, seen_at: datetime | None,
 ) -> tuple[float | None, str | None]:
+    hours = None
+    if seen_at is not None:
+        hours = (seen_at - last_seen_at).total_seconds() / 3600
+        if hours < 0:  # chronology does not depend on knowing where it happened
+            return 0.0, "sighting predates the last-known time"
     if lat is None or lng is None:
         return None, None
     dist = haversine_km(person_lat, person_lng, lat, lng)
-    score = math.exp(-dist / PROXIMITY_SCALE_KM)
-    if seen_at is not None:
-        hours = (seen_at - last_seen_at).total_seconds() / 3600
-        if hours < 0:
-            return 0.0, "sighting predates the last-known time"
-        if dist > 1 and dist / max(hours, 0.05) > MAX_PLAUSIBLE_SPEED_KMH:
-            return 0.0, f"{dist:.0f} km in {hours:.1f} h is not physically plausible"
-    return score, f"{dist:.1f} km from last-known location"
+    if hours is not None and dist > 1 and dist / max(hours, 0.05) > MAX_PLAUSIBLE_SPEED_KMH:
+        return 0.0, f"{dist:.0f} km in {hours:.1f} h is not physically plausible"
+    return math.exp(-dist / PROXIMITY_SCALE_KM), f"{dist:.1f} km from last-known location"
 
 
 def recency_component(seen_at: datetime | None, now: datetime) -> float | None:
