@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from traceai import scoring
-from traceai.db import Lead, MissingPerson, Sighting, utcnow
+from traceai.db import Lead, MissingPerson, Sighting, to_naive_utc, utcnow
 from traceai.geo import gazetteer
 from traceai.geo.clustering import SightingPoint, cluster_sightings, corridor_text
 from traceai.nlp import extractor, textsim
@@ -43,13 +43,16 @@ def ingest_sighting(
 
     Explicit `seen_at` / `lat` / `lng` override what the NLP module infers from the text.
     """
-    reported_at = reported_at or utcnow()
+    reported_at = to_naive_utc(reported_at) or utcnow()
+    seen_at = to_naive_utc(seen_at)
     ex = extractor.extract(text, reported_at)
     if lat is not None and lng is not None:
+        # Coordinates win over the text, so the label must describe the coordinates, not the prose.
         ex.lat, ex.lng = lat, lng
         place, dist = gazetteer.nearest(lat, lng)
-        ex.place_text = ex.place_text or (place.name if dist < 3 else None)
+        ex.place_text = place.name if dist < 3 else None
     seen_at = seen_at or ex.seen_at
+    ex.seen_at = seen_at  # keep the stored extraction and credibility consistent with the row
 
     vec = embedder.embed_file(image_path) if image_path else None
     sighting = Sighting(

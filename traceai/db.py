@@ -13,6 +13,13 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)  # naive UTC keeps SQLite/Postgres alike
 
 
+def to_naive_utc(dt: datetime | None) -> datetime | None:
+    """Timezone-aware datetimes (e.g. ISO strings with an offset or Z) -> naive UTC."""
+    if dt is None or dt.tzinfo is None:
+        return dt
+    return dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+
 class Base(DeclarativeBase):
     pass
 
