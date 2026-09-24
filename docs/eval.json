@@ -1,0 +1,121 @@
+{
+ "face_model": "buffalo_sc",
+ "seeds": 5,
+ "labels": {
+  "random": "Random ordering (expected value)",
+  "proximity": "Proximity to last-known place only",
+  "context": "Text, place, time and credibility (no face)",
+  "face": "Face similarity only",
+  "full": "TraceAI: all signals fused"
+ },
+ "settings": {
+  "standard": {
+   "cases": 30,
+   "sightings_ranked_per_case": 42,
+   "true_per_case": 3,
+   "metrics": {
+    "random": {
+     "p@3": {
+      "mean": 0.07,
+      "sd": 0.007
+     },
+     "hit@1": {
+      "mean": 0.069,
+      "sd": 0.011
+     },
+     "mrr": {
+      "mean": 0.209,
+      "sd": 0.01
+     },
+     "auroc": {
+      "mean": 0.498,
+      "sd": 0.011
+     }
+    },
+    "proximity": {
+     "p@3": {
+      "mean": 0.644,
+      "sd": 0.227
+     },
+     "hit@1": {
+      "mean": 0.633,
+      "sd": 0.482
+     },
+     "mrr": {
+      "mean": 0.806,
+      "sd": 0.258
+     },
+     "auroc": {
+      "mean": 0.975,
+      "sd": 0.019
+     }
+    },
+    "context": {
+     "p@3": {
+      "mean": 0.978,
+      "sd": 0.083
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 0.999,
+      "sd": 0.005
+     }
+    },
+    "face": {
+     "p@3": {
+      "mean": 0.678,
+      "sd": 0.06
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 0.831,
+      "sd": 0.003
+     }
+    },
+    "full": {
+     "p@3": {
+      "mean": 0.989,
+      "sd": 0.06
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 1.0,
+      "sd": 0.002
+     }
+    }
+   }
+  }
+ },
+ "setting_notes": {
+  "standard": "Decoys have a different outfit or hedged wording, so text alone can separate them.",
+  "hard": "Decoys match the outfit, area and confident wording of true sightings; only the face differs."
+ },
+ "caveats": [
+  "Synthetic data: the report templates and the extraction rules were written together, so the text side is optimistic, especially in the standard setting.",
+  "Faces are frontal LFW photos of public figures; 'other camera' is simulated with brightness, blur and downscaling, not real CCTV.",
+  "Only 30 cases per setting (5 seeds x 6 identities): differences of a few points are noise.",
+  "Only 2 of each person's 3 true sightings carry a photo, so face-only ranking cannot exceed precision@3 of about 0.67.",
+  "Compare rows with each other; do not read any row as real-world accuracy."
+ ]
+}

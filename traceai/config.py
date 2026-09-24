@@ -5,6 +5,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.getenv("TRACEAI_DATA_DIR", ROOT / "data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
+# The LFW cache is ~1.4 GB, so let it live somewhere shared (e.g. when evaluating in a temp data dir).
+LFW_HOME = Path(os.getenv("TRACEAI_LFW_HOME", DATA_DIR / "lfw"))
 
 # SQLite keeps local runs zero-setup; docker-compose points this at PostgreSQL.
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{(DATA_DIR / 'traceai.db').as_posix()}")
