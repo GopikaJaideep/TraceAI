@@ -8,3 +8,6 @@ data/*
 *.pid
 *.log
 .env
+data_shots/
+eval_run.log
+eval_hard.log

@@ -102,6 +102,13 @@ tr:last-child td{border-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
 .note{padding:18px}.note h3{margin:0 0 6px;font-size:16px}.note p{margin:0;color:var(--muted);font-size:14.5px}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.shot{margin:0}.shot img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.shot figcaption{font-size:13.5px;color:var(--muted);margin-top:8px}
+.results h3{margin:22px 0 4px;font-size:17px}.results table{background:var(--surface)}
+.results td.num,.results th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.results tr.full td{font-weight:700}
+.results ul{color:var(--muted);font-size:14px;padding-left:20px}
 footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);font-size:13.5px}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .sr{position:absolute;left:-9999px}
@@ -111,7 +118,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
 <header class="nav"><div class="wrap">
   <a class="brand" href="#top"><i aria-hidden="true"></i> TraceAI</a>
   <nav aria-label="Sections">
-    <a href="#demo">Demo</a><a href="#scoring">Scoring</a><a href="#design">Design</a><a href="#safeguards">Safeguards</a>
+    <a href="#demo">Demo</a><a href="#scoring">Scoring</a><a href="#results">Results</a><a href="#design">Design</a><a href="#safeguards">Safeguards</a>
     <a class="gh" href="https://github.com/GopikaJaideep/TraceAI">GitHub</a>
   </nav>
 </div></header>
@@ -167,6 +174,23 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   <div class="panel note" style="margin-top:14px">
     <h3>How a lead score is built</h3>
     <p id="formula"></p>
+  </div>
+</section>
+
+<section id="results" class="results">
+  <h2>Does it rank the right sightings first?</h2>
+  <p class="sub">A small reproducible evaluation on synthetic data (<code>python -m scripts.evaluate</code>). Each case ranks 42 sightings, only 3 of which are true, so random ordering gets precision@3 of about 0.07. Two settings are shown because the first turned out to be too easy.</p>
+  <div id="evalBox"><p class="meta">Loading results…</p></div>
+  <div id="evalReading"></div>
+</section>
+
+<section id="app">
+  <h2>The real application</h2>
+  <p class="sub">The full system behind the demo: a public portal, an officer console, and an admin view with the audit log. These screenshots use placeholder avatars: the project's test photos are real people, so they are never shown.</p>
+  <div class="shots">
+    <figure class="shot"><img loading="lazy" src="img/public-portal.png" alt="The public portal: police-published appeals with placeholder avatars and a submit-only tip form"><figcaption><b>Public portal.</b> Published appeals and a tip form. A tip returns only a receipt.</figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="img/officer-console.png" alt="The officer console: a case with a map of sightings and a ranked list of leads"><figcaption><b>Officer console.</b> Ranked leads, a map and the inferred movement corridor for a case the officer holds.</figcaption></figure>
+    <figure class="shot"><img loading="lazy" src="img/admin-audit.png" alt="The admin view: users and a tamper-evident audit log with the chain verified"><figcaption><b>Admin.</b> Users and the hash-chained audit log, which records every read and change.</figcaption></figure>
   </div>
 </section>
 
@@ -233,6 +257,32 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   const LABELS = { image: "Face match", description: "Description", proximity: "Proximity", recency: "Recency", credibility: "Credibility" };
   const AVATARS = ["#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f"];
   let DATA, map, layer, current, selected;
+
+  fetch("eval.json").then((r) => r.json()).then(renderEval)
+    .catch(() => { $("evalBox").replaceChildren(el("p", "meta", "Results could not be loaded.")); });
+
+  function renderEval(E) {
+    const box = $("evalBox"); box.replaceChildren();
+    ["standard", "hard"].filter((k) => E.settings[k]).forEach((key) => {
+      const S = E.settings[key];
+      box.append(el("h3", null, key === "standard" ? "Standard setting" : "Hard setting"), el("p", "meta", E.setting_notes[key]));
+      const wrap = el("div", "panel scroll"), t = el("table"), head = el("thead"), hr = el("tr");
+      ["Ranking method", "Precision@3", "Top-1 correct", "MRR", "AUROC"].forEach((h, i) => hr.append(el("th", i ? "num" : null, h)));
+      head.append(hr); t.append(head);
+      const body = el("tbody");
+      Object.keys(E.labels).forEach((name) => {
+        const m = S.metrics[name], tr = el("tr", name === "full" ? "full" : null);
+        tr.append(el("td", null, E.labels[name]),
+          el("td", "num", m["p@3"].mean.toFixed(2) + " ± " + m["p@3"].sd.toFixed(2)),
+          el("td", "num", m["hit@1"].mean.toFixed(2)), el("td", "num", m.mrr.mean.toFixed(2)), el("td", "num", m.auroc.mean.toFixed(2)));
+        body.append(tr);
+      });
+      t.append(body); wrap.append(t); box.append(wrap);
+      box.append(el("p", "meta", S.cases + " cases · " + S.sightings_ranked_per_case + " sightings ranked per case · face model " + E.face_model));
+    });
+    box.append(el("h3", null, "Caveats"));
+    const ul = el("ul"); E.caveats.forEach((c) => ul.append(el("li", null, c))); box.append(ul);
+  }
 
   fetch("demo.json").then((r) => r.json()).then((d) => { DATA = d; init(); })
     .catch(() => { $("demo").append(el("p", "meta", "The demo data could not be loaded. Please try refreshing the page.")); });
