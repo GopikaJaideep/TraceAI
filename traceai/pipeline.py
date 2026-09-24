@@ -38,10 +38,15 @@ def ingest_sighting(
     lat: float | None = None,
     lng: float | None = None,
     reported_at: datetime | None = None,
+    source: str = "officer",
+    extra: dict | None = None,
 ) -> tuple[Sighting, list[Lead]]:
-    """Analyse one sighting against every missing-person profile and persist ranked leads.
+    """Analyse one sighting against every *open* case and persist ranked leads.
 
-    Explicit `seen_at` / `lat` / `lng` override what the NLP module infers from the text.
+    Explicit `seen_at` / `lat` / `lng` override what the NLP module infers from the text. Faces are
+    only compared against cases whose officer authorised face matching, and the report's photo is
+    only turned into an embedding when at least one such case exists (data minimisation). `extra`
+    carries source metadata (reference, contact, source_hash, flags) straight onto the Sighting row.
     """
     reported_at = to_naive_utc(reported_at) or utcnow()
     seen_at = to_naive_utc(seen_at)
@@ -54,21 +59,24 @@ def ingest_sighting(
     seen_at = seen_at or ex.seen_at
     ex.seen_at = seen_at  # keep the stored extraction and credibility consistent with the row
 
-    vec = embedder.embed_file(image_path) if image_path else None
+    persons = db.query(MissingPerson).filter(MissingPerson.status == "open").all()
+    face_enabled = any(p.face_matching_authorised and p.embedding for p in persons)
+    vec = embedder.embed_file(image_path) if image_path and face_enabled else None
     sighting = Sighting(
         reported_at=reported_at, seen_at=seen_at, text=text, image_path=image_path,
-        extracted=ex.to_dict(), lat=ex.lat, lng=ex.lng,
-        embedding=vec.tolist() if vec is not None else None,
+        extracted=ex.to_dict(), lat=ex.lat, lng=ex.lng, source=source,
+        embedding=vec.tolist() if vec is not None else None, **(extra or {}),
     )
     db.add(sighting)
     db.flush()
 
     leads = []
-    for person in db.query(MissingPerson).all():
+    for person in persons:
+        cosine = embedder.cosine(person.embedding, sighting.embedding) if person.face_matching_authorised else None
         ls = scoring.score_lead(
             person_lat=person.last_lat, person_lng=person.last_lng, last_seen_at=person.last_seen_at,
             ex=ex, seen_at=seen_at, now=reported_at,
-            face_cosine=embedder.cosine(person.embedding, sighting.embedding),
+            face_cosine=cosine,
             description_sim=description_similarity(person, text, ex.clothing),
             has_photo=image_path is not None,
         )
@@ -86,7 +94,8 @@ CORRIDOR_MIN_SCORE = 0.6  # the corridor is a claim about movement, so only stro
 def person_analysis(db: Session, person_id: int, min_score: float = 0.25) -> dict:
     """Ranked leads plus geospatial clusters and the inferred movement corridor for one person."""
     leads = (
-        db.query(Lead).filter(Lead.person_id == person_id, Lead.score >= min_score)
+        db.query(Lead)
+        .filter(Lead.person_id == person_id, Lead.score >= min_score, Lead.review != "dismissed")
         .order_by(Lead.score.desc()).all()
     )
     points = [
