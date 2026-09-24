@@ -10,8 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt insightface \
 
 COPY traceai ./traceai
 COPY dashboard ./dashboard
+COPY public_portal ./public_portal
 COPY scripts ./scripts
 
 ENV TRACEAI_DATA_DIR=/data
-EXPOSE 8000 8501
-CMD ["uvicorn", "traceai.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8010 8020 8501 8502
+CMD ["uvicorn", "traceai.api.public_app:app", "--host", "0.0.0.0", "--port", "8020"]

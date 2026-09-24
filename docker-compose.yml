@@ -1,9 +1,24 @@
+# Two trust zones. The public services are the only ones published to the world. The officer services
+# bind to localhost here: in production put them behind the agency VPN / SSO gateway, never on the
+# open internet. The database is reachable only from inside the compose network.
+x-app: &app
+  build: .
+  environment: &env
+    DATABASE_URL: postgresql+psycopg2://traceai:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/traceai
+    TRACEAI_SECRET_KEY: ${TRACEAI_SECRET_KEY:?set a long random TRACEAI_SECRET_KEY}
+    TRACEAI_DATA_DIR: /data
+  volumes:
+    - appdata:/data
+  depends_on:
+    db:
+      condition: service_healthy
+
 services:
   db:
     image: postgres:16
     environment:
       POSTGRES_USER: traceai
-      POSTGRES_PASSWORD: traceai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       POSTGRES_DB: traceai
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -12,27 +27,37 @@ services:
       interval: 5s
       retries: 10
 
-  api:
-    build: .
-    environment:
-      DATABASE_URL: postgresql+psycopg2://traceai:traceai@db:5432/traceai
-    volumes:
-      - appdata:/data
+  # ---- public zone -------------------------------------------------------------------------------
+  public-api:
+    <<: *app
+    command: ["uvicorn", "traceai.api.public_app:app", "--host", "0.0.0.0", "--port", "8020"]
     ports:
-      - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
+      - "8020:8020"
 
-  dashboard:
-    build: .
+  public-portal:
+    <<: *app
+    command: ["streamlit", "run", "public_portal/app.py", "--server.port=8502", "--server.address=0.0.0.0"]
+    environment:
+      TRACEAI_PUBLIC_API_URL: http://public-api:8020
+    ports:
+      - "8502:8502"
+    depends_on: [public-api]
+
+  # ---- officer zone (localhost only) -------------------------------------------------------------
+  officer-api:
+    <<: *app
+    command: ["uvicorn", "traceai.api.officer_app:app", "--host", "0.0.0.0", "--port", "8010"]
+    ports:
+      - "127.0.0.1:8010:8010"
+
+  officer-console:
+    <<: *app
     command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
     environment:
-      TRACEAI_API_URL: http://api:8000
+      TRACEAI_API_URL: http://officer-api:8010
     ports:
-      - "8501:8501"
-    depends_on:
-      - api
+      - "127.0.0.1:8501:8501"
+    depends_on: [officer-api]
 
 volumes:
   pgdata:

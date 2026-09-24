@@ -23,3 +23,23 @@ DISCLAIMER = (
     "cases, and is an investigative support tool, not an identification system. "
     "Every lead needs human review."
 )
+
+# --- Access control -------------------------------------------------------------------------------
+# Signs officer session tokens and keys the hash of tipster IPs. Set a long random value in any real
+# deployment; without one a throwaway key is generated (sessions then end whenever the API restarts).
+SECRET_KEY = os.getenv("TRACEAI_SECRET_KEY", "")
+TOKEN_TTL_SECONDS = int(os.getenv("TRACEAI_TOKEN_TTL", str(4 * 3600)))
+MIN_PASSWORD_LENGTH = 12
+MAX_FAILED_LOGINS = 5
+LOCKOUT_MINUTES = 15
+
+# --- Public tip portal ----------------------------------------------------------------------------
+TIP_MAX_TEXT = 2000
+TIP_MAX_IMAGE_BYTES = 5 * 1024 * 1024
+TIP_RATE_PER_10MIN = int(os.getenv("TRACEAI_TIP_RATE_10MIN", "5"))
+TIP_RATE_PER_DAY = int(os.getenv("TRACEAI_TIP_RATE_DAY", "20"))
+TIP_FLAG_SOURCE_VOLUME = 3  # flag the 3rd and later tip from one source within 24 h
+LOGIN_RATE_PER_MIN = 10
+
+# Public tips are deleted after this many days unless an officer marked a resulting lead useful.
+TIP_RETENTION_DAYS = int(os.getenv("TRACEAI_TIP_RETENTION_DAYS", "90"))
