@@ -60,7 +60,8 @@ jobs:
         run: |
           for url in http://localhost:8020/health http://127.0.0.1:8010/health \
                      http://localhost:8502/_stcore/health http://127.0.0.1:8501/_stcore/health; do
-            curl -fsS --retry 60 --retry-delay 5 --retry-connrefused --max-time 20 "$url" >/dev/null
+            # Ports reset connections while a container boots, which plain --retry does not treat as transient.
+            curl -fsS --retry 60 --retry-delay 5 --retry-all-errors --retry-max-time 420 --max-time 20 "$url" >/dev/null
             echo "up: $url"
           done
       - name: Zone boundaries
@@ -93,7 +94,11 @@ jobs:
           curl -fsS "http://127.0.0.1:8010/officer/cases/$CASE/analysis" -H "$AUTH" | grep -q '"source":"public"'
       - name: Service logs (on failure)
         if: failure()
-        run: docker compose logs --no-color --tail=80
+        run: |
+          docker compose ps -a
+          for s in public-api officer-api public-portal officer-console; do
+            echo "=== $s"; docker compose logs --no-color --tail=40 "$s"
+          done
       - name: Stop
         if: always()
         run: docker compose down -v
