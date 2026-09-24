@@ -1,0 +1,12 @@
+fastapi
+sqlalchemy
+pydantic
+python-multipart
+numpy
+pandas
+scikit-learn
+pillow
+opencv-python-headless
+itsdangerous
+httpx
+pytest
