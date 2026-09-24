@@ -1,0 +1,7 @@
+# Files that Linux tools parse literally (shell steps, Dockerfile line continuations, pip) must use LF,
+# whatever the contributor's OS or git autocrlf setting.
+.github/** text eol=lf
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+requirements*.txt text eol=lf
+*.sh text eol=lf

@@ -1,25 +1,122 @@
 # TraceAI
 
+[![CI](https://github.com/GopikaJaideep/TraceAI/actions/workflows/ci.yml/badge.svg)](https://github.com/GopikaJaideep/TraceAI/actions/workflows/ci.yml)
+
 AI-assisted missing-person investigation **support** platform for Australian contexts. **Police and
-partner agencies** use it to review and prioritise leads; **the general public** can only read published
-appeals and submit tips.
+partner agencies** review and prioritise leads; **the general public** can only read published appeals and
+submit tips.
+
+**[Live demo](https://gopikajaideep.github.io/TraceAI/)** · **[Design decisions and ethics](docs/design-decisions.md)** · [Results](#results)
 
 > **Research prototype.** Public research datasets and synthetic profiles only. No real cases, no real
-> CCTV or personal data. It is an investigative support tool, not an identification system. Do not
-> point it at real data until the "Before real use" list below is done.
+> CCTV or personal data. It is an investigative support tool, not an identification system. Do not point it
+> at real data until the "Before real use" list below is done.
 
-## Two trust zones
+![Officer console: ranked leads, map and movement corridor](docs/img/officer-flow.gif)
+
+| Public portal | Admin and audit log |
+|---|---|
+| ![Public portal with appeals and a tip form](docs/img/public-portal.png) | ![Admin view with the hash-chained audit log](docs/img/admin-audit.png) |
+
+Screenshots use placeholder avatars: the test photos (LFW) are real people, so they are never published.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph PUBLIC["Public zone (anyone)"]
+        PP["Public portal<br/>Streamlit"] --> PA["Public API<br/>FastAPI"]
+    end
+    subgraph OFFICER["Officer zone (verified staff, login required)"]
+        OC["Officer console<br/>Streamlit"] --> OA["Officer API<br/>FastAPI"]
+    end
+    subgraph PIPE["Scoring pipeline"]
+        NLP["NLP extraction<br/>place, clothing, time"]
+        FACE["Face similarity<br/>ArcFace, opt-in per case"]
+        GEO["Geospatial<br/>gazetteer, DBSCAN clusters"]
+        SCORE["Lead scoring<br/>5 signals, identity factor, hard rules"]
+        NLP --> SCORE
+        FACE --> SCORE
+        GEO --> SCORE
+    end
+    DB[("PostgreSQL / SQLite")]
+    PA -- "tip in, receipt only back" --> PIPE
+    PIPE --> DB
+    PA -- "published appeals" --> DB
+    OA -- "cases, leads, audit log" --> DB
+```
+
+The two zones are **separate processes**: the public app does not contain the officer routes at all, so it
+cannot leak them through a bug or misconfiguration.
 
 | | Public zone | Officer zone |
 |---|---|---|
 | Who | Anyone | Verified police / NGO staff |
-| App | `traceai.api.public_app` (port 8020) + `public_portal/` (8502) | `traceai.api.officer_app` (8010) + `dashboard/` (8501) |
+| App | `traceai.api.public_app` (8020) + `public_portal/` (8502) | `traceai.api.officer_app` (8010) + `dashboard/` (8501) |
 | Can do | Read appeals an officer published; submit a tip | Open and close cases, review leads, see the map, manage users (admin) |
-| Sees | City-level location, photo and summary that an officer chose to publish | Only the cases they were granted |
-| Gets back from a tip | A random receipt reference. Never a score, a match or a case | Ranked leads with per-signal breakdown |
+| Sees | City-level location, photo and summary an officer chose to publish | Only the cases they were granted |
+| Gets back from a tip | A random receipt reference. Never a score, a match or a case | Ranked leads with a per-signal breakdown |
 
-They are **separate processes**: the public app does not contain the officer routes at all, so it cannot
-leak them through a bug or misconfiguration.
+## How leads are scored
+
+| Module | Approach |
+|---|---|
+| Vision | InsightFace / ArcFace embeddings, cosine similarity between a case photo and a tip photo |
+| NLP | Extracts place (Australian gazetteer), clothing and time from free text; optional spaCy NER; hedging and certainty cues feed credibility |
+| Geospatial | DBSCAN (haversine) clusters of strong sightings and an inferred movement corridor |
+| Lead scoring | Weighted image, description, proximity, recency and credibility. Missing signals are dropped and weights renormalised. Identity evidence (face or description) scales the result. Impossible journeys and sightings that predate the last-known time score 0 |
+
+## Results
+
+`python -m scripts.evaluate` ranks 42 sightings per case, of which 3 are true sightings of that case's
+person (a different photo of the same identity, degraded to mimic another camera). Random ordering gets
+precision@3 of about 0.07. 30 cases per setting (5 seeds × 6 identities), InsightFace `buffalo_sc`. "±" is the
+standard deviation across cases.
+
+**Standard setting**: decoys wear a different outfit or hedge their wording.
+
+| Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
+|---|---|---|---|---|
+| Random ordering (expected value) | 0.07 ± 0.14 | 0.07 | 0.21 | 0.50 |
+| Proximity to last-known place only | 0.68 ± 0.25 | 0.80 | 0.88 | 0.98 |
+| Text, place, time and credibility (no face) | 0.91 ± 0.17 | 1.00 | 1.00 | 1.00 |
+| Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
+| **TraceAI: all signals fused** | **0.94 ± 0.12** | 1.00 | 1.00 | 1.00 |
+
+Here the report templates and the extraction rules were written together, so text alone already does well
+and fusion adds little: 0.91 to 0.94 is within the noise (each mean has a standard error of about 0.03).
+This setting cannot show what combining signals is for.
+
+**Hard setting** (`--setting hard`): decoys have the same outfit, the same confident wording, and the same
+places and times as true sightings, so only the face separates them.
+
+| Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
+|---|---|---|---|---|
+| Random ordering (expected value) | 0.07 ± 0.14 | 0.07 | 0.21 | 0.50 |
+| Proximity to last-known place only | 0.39 ± 0.17 | 0.43 | 0.68 | 0.94 |
+| Text, place, time and credibility (no face) | 0.48 ± 0.24 | 0.40 | 0.65 | 0.95 |
+| Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
+| **TraceAI: all signals fused** | **0.96 ± 0.11** | 0.97 | 0.98 | 1.00 |
+
+**How to read this honestly.**
+
+- Without the face, ranking is at chance among the six look-alike candidates (3 true, 3 decoys, so about
+  0.5 is what guessing gives). The face alone is capped near 0.67 because only 2 of each person's 3 true
+  sightings carry a photo.
+- Fused ranking scores 0.96, above the face-only cap. **That gain comes from an asymmetry in the benchmark,
+  not only from good fusion:** every decoy carries a photo, but one true sighting per person does not.
+  Mismatched faces push decoys down, and the photo-less true sighting is not penalised, so it ranks above
+  them. Real tips will mostly have no photo, so treat 0.96 as an upper bound. A fairer test would give most
+  decoys no photo too; I have not run it.
+- It is synthetic throughout: frontal photos of public figures, not CCTV; reports and extraction rules
+  written together; 30 cases per setting, so gaps of a few points are noise.
+
+Earlier versions of this benchmark had two flaws that flattered the results (a decoy could reuse another
+case's face, and hard-setting decoys were easier to place than true sightings). Both are fixed and the run
+now asserts the first can't recur, so these numbers are lower than the ones first published in the PR.
+
+Numbers are also on the [demo site](https://gopikajaideep.github.io/TraceAI/#results) and in
+`docs/eval.json`. Do not read any row as real-world accuracy.
 
 ## Misuse safeguards (what the code enforces)
 
@@ -35,6 +132,9 @@ leak them through a bug or misconfiguration.
 | Data kept forever | Closing a case deletes its photo, face embedding and leads; public tips expire after 90 days unless an officer marked one useful (`python -m scripts.purge`) | `cases.close_case`, `purge_expired_tips` |
 | Source tracing | Tipster IPs are stored only as a keyed hash, never raw | `security.source_hash` |
 
+The reasoning, the alternatives I rejected and the risks I could not remove are in
+[docs/design-decisions.md](docs/design-decisions.md).
+
 ## Before real use (not done, and not something code alone can do)
 
 - **Legal and privacy:** biometric data is sensitive information under the Privacy Act 1988; get a privacy
@@ -46,8 +146,8 @@ leak them through a bug or misconfiguration.
   `X-Forwarded-For` policy behind your proxy.
 - **Audit:** ship the audit log to write-once storage. The hash chain detects edits; it cannot stop someone
   with database admin rights from rewriting the whole chain.
-- **Accuracy:** measure face-matching and lead-ranking error rates, including across demographic groups,
-  on data that resembles reality. Current numbers come from synthetic data only.
+- **Accuracy and fairness:** measure face-matching and lead-ranking error rates, including across
+  demographic groups, on data that resembles reality.
 - **Assurance:** independent security testing and an ethics review.
 
 ## Run locally
@@ -80,26 +180,30 @@ TRACEAI_PUBLIC_API_URL=http://localhost:8020 .venv/Scripts/python -m streamlit r
 POSTGRES_PASSWORD=... TRACEAI_SECRET_KEY=... docker compose up --build
 ```
 
-Public services are published on 8020 and 8502; officer services bind to `127.0.0.1` only. Not yet tested
-(no Docker on the development machine).
+Public services are published on 8020 and 8502; officer services bind to `127.0.0.1` only. The
+[CI workflow](.github/workflows/ci.yml) builds the images and smoke-tests the whole stack against
+PostgreSQL on every push: all four services come up, the zone boundaries hold (officer routes return 401
+without login and do not exist on the public app), and a case, a public tip and the officer's analysis
+round-trip through the database. If you would rather not use Docker, the manual path above works.
 
-## How leads are scored
-
-| Module | Approach |
-|---|---|
-| Vision | InsightFace / ArcFace embeddings, cosine similarity between a case photo and a tip photo |
-| NLP | Extracts place (Australian gazetteer), clothing and time from free text; optional spaCy NER; hedging and certainty cues feed credibility |
-| Geospatial | DBSCAN (haversine) clusters of strong sightings and an inferred movement corridor |
-| Lead scoring | Weighted image, description, proximity, recency and credibility. Missing signals are dropped and weights renormalised. Identity evidence (face or description) scales the result. Impossible journeys and sightings that predate the last-known time score 0 |
-
-## Tests
+## Tests and CI
 
 ```bash
-.venv/Scripts/python -m pytest -q tests
+.venv/Scripts/python -m pytest -q tests           # 48 tests, through the real HTTP layer
+.venv/Scripts/python -m scripts.mutation_check    # breaks 10 safeguards one at a time; the tests must fail each time
 ```
 
-The access-control and public-portal tests run through the real HTTP layer. Each safeguard was checked
-by deliberately breaking it and confirming a test fails.
+CI runs the tests on Python 3.11 and 3.13, runs `mutation_check` (so "each safeguard was verified by
+breaking it" is reproducible rather than a claim), and runs the Docker smoke test.
+
+## Reproducing the screenshots and results
+
+```bash
+python -m scripts.evaluate --seeds 5 --setting standard   # and --setting hard
+python -m scripts.export_demo                             # data for the demo site
+python -m scripts.make_screenshot_data                    # photo-free database copy
+python -m scripts.capture_screenshots                     # needs: pip install playwright
+```
 
 ## Limitations
 

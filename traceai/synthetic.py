@@ -49,7 +49,7 @@ def _load_lfw(min_faces: int = 4):
 
     lfw = fetch_lfw_people(
         min_faces_per_person=min_faces, color=True, resize=1.0,
-        slice_=(slice(0, 250), slice(0, 250)), data_home=str(config.DATA_DIR / "lfw"),
+        slice_=(slice(0, 250), slice(0, 250)), data_home=str(config.LFW_HOME),
     )
     # scikit-learn returns float32 scaled to [0, 1]; truncating that straight to uint8 gives black images.
     images = np.clip(lfw.images * 255.0, 0, 255).round().astype(np.uint8)
@@ -75,8 +75,13 @@ def _augment(img: np.ndarray, rng: random.Random) -> np.ndarray:
     return cv2.resize(small, (img.shape[1], img.shape[0]))
 
 
-def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None):
-    """Return (profiles, sighting_specs). Profiles are *unsaved* MissingPerson objects."""
+def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None, hard: bool = False):
+    """Return (profiles, sighting_specs). Profiles are *unsaved* MissingPerson objects.
+
+    With `hard=True` the decoys read exactly like true sightings (same outfit, same area, confident
+    wording) and differ only by whose face is in the photo, so text alone cannot separate them. That is
+    the situation where the face signal has to earn its place.
+    """
     rng = random.Random(seed)
     now = now or datetime.utcnow()
     images, target, _ = _load_lfw()
@@ -119,15 +124,27 @@ def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None
             text = rng.choice(TRUE_TEMPLATES).format(
                 place=place.name, c0=outfit[0], c1=outfit[1], t=_fmt_time(when))
             photo = _augment(images[sighting_photos[step % len(sighting_photos)]], rng) if step < 2 else None
-            specs.append({"truth": idx, "text": text, "seen_at": when, "photo": photo, "kind": "true"})
+            specs.append({"truth": idx, "text": text, "seen_at": when, "photo": photo, "kind": "true",
+                          "photo_identity": int(ident)})
         for _ in range(3):  # decoys: wrong outfit, other identity, hedged
-            other = rng.choice([i for i in identities if i != ident])
+            # Never reuse a face that belongs to another selected profile: that photo *is* a sighting of
+            # that person, so labelling it a decoy would corrupt the ground truth when it is ranked for them.
+            other = rng.choice([i for i in identities if i not in chosen])
             oi = rng.choice([int(i) for i in np.where(target == other)[0]])
-            place = rng.choice(anchors)
-            when = last_seen + timedelta(hours=rng.randint(3, 20))
-            text = rng.choice(DECOY_TEMPLATES).format(
-                place=place.name, c0=rng.choice([o for o in OUTFITS if o != outfit])[0], t=_fmt_time(when))
-            specs.append({"truth": None, "text": text, "seen_at": when,
+            if hard:
+                # Same places and times as the true sightings, so proximity and recency cannot leak the label.
+                place = rng.choice(trail)
+                when = last_seen + timedelta(hours=4 + 5 * rng.randrange(3))
+            else:
+                place = rng.choice(anchors)
+                when = last_seen + timedelta(hours=rng.randint(3, 20))
+            if hard:
+                text = rng.choice(TRUE_TEMPLATES).format(
+                    place=place.name, c0=outfit[0], c1=outfit[1], t=_fmt_time(when))
+            else:
+                text = rng.choice(DECOY_TEMPLATES).format(
+                    place=place.name, c0=rng.choice([o for o in OUTFITS if o != outfit])[0], t=_fmt_time(when))
+            specs.append({"truth": None, "text": text, "seen_at": when, "photo_identity": int(other),
                           "photo": _augment(images[oi], rng), "kind": "decoy"})
         # one far-away report that is not physically plausible
         far_city = rng.choice([c for c in cities if c != city])
