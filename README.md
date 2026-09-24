@@ -70,42 +70,50 @@ cannot leak them through a bug or misconfiguration.
 
 `python -m scripts.evaluate` ranks 42 sightings per case, of which 3 are true sightings of that case's
 person (a different photo of the same identity, degraded to mimic another camera). Random ordering gets
-precision@3 of about 0.07. 30 cases per setting, InsightFace `buffalo_sc`.
+precision@3 of about 0.07. 30 cases per setting (5 seeds × 6 identities), InsightFace `buffalo_sc`. "±" is the
+standard deviation across cases.
 
 **Standard setting**: decoys wear a different outfit or hedge their wording.
 
 | Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
 |---|---|---|---|---|
-| Random ordering (expected value) | 0.07 ± 0.01 | 0.07 | 0.21 | 0.50 |
-| Proximity to last-known place only | 0.64 ± 0.23 | 0.63 | 0.81 | 0.97 |
-| Text, place, time and credibility (no face) | 0.98 ± 0.08 | 1.00 | 1.00 | 1.00 |
+| Random ordering (expected value) | 0.07 ± 0.14 | 0.07 | 0.21 | 0.50 |
+| Proximity to last-known place only | 0.68 ± 0.25 | 0.80 | 0.88 | 0.98 |
+| Text, place, time and credibility (no face) | 0.91 ± 0.17 | 1.00 | 1.00 | 1.00 |
 | Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
-| **TraceAI: all signals fused** | **0.99 ± 0.06** | 1.00 | 1.00 | 1.00 |
+| **TraceAI: all signals fused** | **0.94 ± 0.12** | 1.00 | 1.00 | 1.00 |
 
-The standard setting is too easy: the report templates and the extraction rules were written together, so
-text alone is nearly perfect and fusion adds almost nothing. It cannot show what combining signals is for.
+Here the report templates and the extraction rules were written together, so text alone already does well
+and fusion adds little: 0.91 to 0.94 is within the noise (each mean has a standard error of about 0.03).
+This setting cannot show what combining signals is for.
 
-**Hard setting** (`--setting hard`): decoys match the outfit, area and confident wording of true sightings,
-so only the face separates them.
+**Hard setting** (`--setting hard`): decoys have the same outfit, the same confident wording, and the same
+places and times as true sightings, so only the face separates them.
 
 | Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
 |---|---|---|---|---|
-| Random ordering (expected value) | 0.07 ± 0.01 | 0.07 | 0.21 | 0.50 |
-| Proximity to last-known place only | 0.63 ± 0.25 | 0.67 | 0.81 | 0.97 |
-| Text, place, time and credibility (no face) | 0.52 ± 0.25 | 0.40 | 0.65 | 0.96 |
+| Random ordering (expected value) | 0.07 ± 0.14 | 0.07 | 0.21 | 0.50 |
+| Proximity to last-known place only | 0.39 ± 0.17 | 0.43 | 0.68 | 0.94 |
+| Text, place, time and credibility (no face) | 0.48 ± 0.24 | 0.40 | 0.65 | 0.95 |
 | Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
 | **TraceAI: all signals fused** | **0.96 ± 0.11** | 0.97 | 0.98 | 1.00 |
 
-**How to read this honestly.** When text cannot separate the candidates, text-only ranking falls from 0.98
-to 0.52, and the face signal alone is capped near 0.67 because only 2 of each person's 3 true sightings
-carry a photo. Fusing the signals recovers 0.96. That is the case for combining them. Two things keep it
-from being a real-world claim:
+**How to read this honestly.**
 
-- **The benchmark favours fusion.** Every decoy carries a photo, but one of each person's true sightings
-  does not. Mismatched faces push decoys down while the photo-less true sighting is not penalised. Real
-  tips will mostly have no photo.
-- **It is synthetic throughout.** Frontal photos of public figures, not CCTV; reports and extraction rules
-  written together; only 30 cases per setting, so gaps of a few points are noise.
+- Without the face, ranking is at chance among the six look-alike candidates (3 true, 3 decoys, so about
+  0.5 is what guessing gives). The face alone is capped near 0.67 because only 2 of each person's 3 true
+  sightings carry a photo.
+- Fused ranking scores 0.96, above the face-only cap. **That gain comes from an asymmetry in the benchmark,
+  not only from good fusion:** every decoy carries a photo, but one true sighting per person does not.
+  Mismatched faces push decoys down, and the photo-less true sighting is not penalised, so it ranks above
+  them. Real tips will mostly have no photo, so treat 0.96 as an upper bound. A fairer test would give most
+  decoys no photo too; I have not run it.
+- It is synthetic throughout: frontal photos of public figures, not CCTV; reports and extraction rules
+  written together; 30 cases per setting, so gaps of a few points are noise.
+
+Earlier versions of this benchmark had two flaws that flattered the results (a decoy could reuse another
+case's face, and hard-setting decoys were easier to place than true sightings). Both are fixed and the run
+now asserts the first can't recur, so these numbers are lower than the ones first published in the PR.
 
 Numbers are also on the [demo site](https://gopikajaideep.github.io/TraceAI/#results) and in
 `docs/eval.json`. Do not read any row as real-world accuracy.

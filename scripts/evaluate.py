@@ -79,6 +79,9 @@ def run(seeds: int, persons: int, hard: bool) -> tuple[dict, int, int]:
         Base.metadata.create_all(engine)
         db = sessionmaker(engine)()
         profiles, specs = build_dataset(n_persons=persons, seed=seed, hard=hard)
+        selected = {s["photo_identity"] for s in specs if s["kind"] == "true"}
+        clash = selected & {s["photo_identity"] for s in specs if s["kind"] == "decoy"}
+        assert not clash, f"decoy photos reuse selected identities {clash}: the ground truth would be wrong"
         db.add_all(profiles)
         db.commit()
         truth = {}
@@ -95,8 +98,9 @@ def run(seeds: int, persons: int, hard: bool) -> tuple[dict, int, int]:
             n_cases += 1
             for name in CONFIGS:
                 if name == "random":
-                    runs = [_rank_metrics(labels, rng.random(len(labels)), rng) for _ in range(300)]
-                    per_config[name].append({k: statistics.fmean(r[k] for r in runs) for k in runs[0]})
+                    # Keep every draw as its own outcome, so the reported spread is per ranking (like the
+                    # other rows) and not the much smaller spread of averages of 300 draws.
+                    per_config[name].extend(_rank_metrics(labels, rng.random(len(labels)), rng) for _ in range(300))
                 else:
                     per_config[name].append(_rank_metrics(labels, np.array([_score(name, l) for l in leads]), rng))
         db.close()
@@ -115,7 +119,7 @@ def main() -> None:
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--persons", type=int, default=6)
     ap.add_argument("--setting", choices=["standard", "hard"], default="standard",
-                    help="hard: decoys match the outfit and area, so only the face separates them")
+                    help="hard: decoys share outfit, wording, places and times, so only the face separates them")
     args = ap.parse_args()
 
     summary, n_cases, _ = run(args.seeds, args.persons, hard=args.setting == "hard")
@@ -134,7 +138,7 @@ def main() -> None:
         "face_model": config.FACE_MODEL, "seeds": args.seeds, "labels": CONFIGS, "settings": settings,
         "setting_notes": {
             "standard": "Decoys have a different outfit or hedged wording, so text alone can separate them.",
-            "hard": "Decoys match the outfit, area and confident wording of true sightings; only the face differs.",
+            "hard": "Decoys share the outfit, confident wording, places and times of true sightings; only the face differs.",
         },
         "caveats": [
             "Synthetic data: the report templates and the extraction rules were written together, so the text "

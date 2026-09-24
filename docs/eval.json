@@ -17,43 +17,43 @@
     "random": {
      "p@3": {
       "mean": 0.07,
-      "sd": 0.007
+      "sd": 0.144
      },
      "hit@1": {
       "mean": 0.069,
-      "sd": 0.011
+      "sd": 0.254
      },
      "mrr": {
       "mean": 0.209,
-      "sd": 0.01
+      "sd": 0.248
      },
      "auroc": {
       "mean": 0.498,
-      "sd": 0.011
+      "sd": 0.174
      }
     },
     "proximity": {
      "p@3": {
-      "mean": 0.644,
-      "sd": 0.227
+      "mean": 0.678,
+      "sd": 0.251
      },
      "hit@1": {
-      "mean": 0.633,
-      "sd": 0.482
+      "mean": 0.8,
+      "sd": 0.4
      },
      "mrr": {
-      "mean": 0.806,
-      "sd": 0.258
+      "mean": 0.883,
+      "sd": 0.236
      },
      "auroc": {
-      "mean": 0.975,
-      "sd": 0.019
+      "mean": 0.978,
+      "sd": 0.021
      }
     },
     "context": {
      "p@3": {
-      "mean": 0.978,
-      "sd": 0.083
+      "mean": 0.911,
+      "sd": 0.171
      },
      "hit@1": {
       "mean": 1.0,
@@ -64,8 +64,8 @@
       "sd": 0.0
      },
      "auroc": {
-      "mean": 0.999,
-      "sd": 0.005
+      "mean": 0.996,
+      "sd": 0.01
      }
     },
     "face": {
@@ -82,14 +82,14 @@
       "sd": 0.0
      },
      "auroc": {
-      "mean": 0.831,
-      "sd": 0.003
+      "mean": 0.83,
+      "sd": 0.004
      }
     },
     "full": {
      "p@3": {
-      "mean": 0.989,
-      "sd": 0.06
+      "mean": 0.944,
+      "sd": 0.124
      },
      "hit@1": {
       "mean": 1.0,
@@ -100,8 +100,8 @@
       "sd": 0.0
      },
      "auroc": {
-      "mean": 1.0,
-      "sd": 0.002
+      "mean": 0.999,
+      "sd": 0.003
      }
     }
    }
@@ -114,55 +114,55 @@
     "random": {
      "p@3": {
       "mean": 0.07,
-      "sd": 0.007
+      "sd": 0.144
      },
      "hit@1": {
       "mean": 0.069,
-      "sd": 0.011
+      "sd": 0.254
      },
      "mrr": {
       "mean": 0.209,
-      "sd": 0.01
+      "sd": 0.248
      },
      "auroc": {
       "mean": 0.498,
-      "sd": 0.011
+      "sd": 0.174
      }
     },
     "proximity": {
      "p@3": {
-      "mean": 0.633,
-      "sd": 0.249
+      "mean": 0.389,
+      "sd": 0.174
      },
      "hit@1": {
-      "mean": 0.667,
-      "sd": 0.471
+      "mean": 0.433,
+      "sd": 0.496
      },
      "mrr": {
-      "mean": 0.814,
-      "sd": 0.268
+      "mean": 0.682,
+      "sd": 0.288
      },
      "auroc": {
-      "mean": 0.975,
-      "sd": 0.023
+      "mean": 0.944,
+      "sd": 0.03
      }
     },
     "context": {
      "p@3": {
-      "mean": 0.522,
-      "sd": 0.254
+      "mean": 0.478,
+      "sd": 0.239
      },
      "hit@1": {
       "mean": 0.4,
       "sd": 0.49
      },
      "mrr": {
-      "mean": 0.654,
-      "sd": 0.293
+      "mean": 0.65,
+      "sd": 0.298
      },
      "auroc": {
-      "mean": 0.959,
-      "sd": 0.028
+      "mean": 0.954,
+      "sd": 0.03
      }
     },
     "face": {
@@ -197,8 +197,8 @@
       "sd": 0.09
      },
      "auroc": {
-      "mean": 0.997,
-      "sd": 0.007
+      "mean": 0.998,
+      "sd": 0.006
      }
     }
    }
@@ -206,7 +206,7 @@
  },
  "setting_notes": {
   "standard": "Decoys have a different outfit or hedged wording, so text alone can separate them.",
-  "hard": "Decoys match the outfit, area and confident wording of true sightings; only the face differs."
+  "hard": "Decoys share the outfit, confident wording, places and times of true sightings; only the face differs."
  },
  "caveats": [
   "Synthetic data: the report templates and the extraction rules were written together, so the text side is optimistic, especially in the standard setting.",
