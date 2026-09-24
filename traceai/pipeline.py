@@ -80,6 +80,9 @@ def ingest_sighting(
     return sighting, sorted(leads, key=lambda l: -l.score)
 
 
+CORRIDOR_MIN_SCORE = 0.6  # the corridor is a claim about movement, so only strong leads feed it
+
+
 def person_analysis(db: Session, person_id: int, min_score: float = 0.25) -> dict:
     """Ranked leads plus geospatial clusters and the inferred movement corridor for one person."""
     leads = (
@@ -88,7 +91,7 @@ def person_analysis(db: Session, person_id: int, min_score: float = 0.25) -> dic
     )
     points = [
         SightingPoint(l.sighting.id, l.sighting.lat, l.sighting.lng, l.sighting.seen_at, l.score)
-        for l in leads if l.sighting.lat is not None
+        for l in leads if l.sighting.lat is not None and l.score >= max(min_score, CORRIDOR_MIN_SCORE)
     ]
     clusters = cluster_sightings(points)
     return {"leads": leads, "clusters": clusters, "corridor": corridor_text(clusters)}

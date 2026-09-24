@@ -73,3 +73,17 @@ def test_clusters_and_corridor():
     clusters = cluster_sightings(pts)
     assert sorted(c.size for c in clusters) == [2, 2]
     assert corridor_text(clusters) == "Flinders Street Station → Richmond"
+
+
+def test_identity_evidence_scales_the_score():
+    ex = extractor.Extraction(place_text="x", lat=-37.8241, lng=144.9903, seen_at=NOW - timedelta(hours=2))
+
+    def score(desc, cosine=None):
+        return scoring.score_lead(
+            person_lat=-37.8183, person_lng=144.9671, last_seen_at=NOW - timedelta(hours=10),
+            ex=ex, seen_at=ex.seen_at, now=NOW, face_cosine=cosine, description_sim=desc, has_photo=False,
+        ).score
+
+    # Same place/time/credibility: a report describing someone else must not rank like a match.
+    assert score(0.15) < 0.7 * score(0.8)
+    assert score(0.15, cosine=0.65) > score(0.15)  # a strong face match rescues a vague description

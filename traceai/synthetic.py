@@ -51,7 +51,9 @@ def _load_lfw(min_faces: int = 4):
         min_faces_per_person=min_faces, color=True, resize=1.0,
         slice_=(slice(0, 250), slice(0, 250)), data_home=str(config.DATA_DIR / "lfw"),
     )
-    return lfw.images.astype(np.uint8), lfw.target, lfw.target_names  # RGB
+    # scikit-learn returns float32 scaled to [0, 1]; truncating that straight to uint8 gives black images.
+    images = np.clip(lfw.images * 255.0, 0, 255).round().astype(np.uint8)
+    return images, lfw.target, lfw.target_names  # RGB
 
 
 def _save(img_rgb: np.ndarray, name: str) -> str:
