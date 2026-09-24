@@ -144,6 +144,9 @@ def main() -> None:
             "Only 30 cases per setting (5 seeds x 6 identities): differences of a few points are noise.",
             "Only 2 of each person's 3 true sightings carry a photo, so face-only ranking cannot exceed "
             "precision@3 of about 0.67.",
+            "Every decoy carries a photo but one of each person's three true sightings does not, which favours "
+            "fusion: mismatched faces push decoys down while the photo-less true sighting is not penalised. "
+            "Real tips will mostly have no photo.",
             "Compare rows with each other; do not read any row as real-world accuracy.",
         ],
     }

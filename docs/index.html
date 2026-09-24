@@ -181,7 +181,11 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   <h2>Does it rank the right sightings first?</h2>
   <p class="sub">A small reproducible evaluation on synthetic data (<code>python -m scripts.evaluate</code>). Each case ranks 42 sightings, only 3 of which are true, so random ordering gets precision@3 of about 0.07. Two settings are shown because the first turned out to be too easy.</p>
   <div id="evalBox"><p class="meta">Loading results…</p></div>
-  <div id="evalReading"></div>
+  <div id="evalReading" class="panel note" style="margin-top:14px">
+    <h3>What this shows, and what it doesn't</h3>
+    <p>The standard setting is too easy: text alone is nearly perfect, so it can't show what fusion is for. In the hard setting, where decoys match the outfit and area, text-only ranking drops from 0.98 to 0.52 and face-only is capped near 0.67 because a third of true sightings have no photo. Fusing the signals recovers 0.96.</p>
+    <p style="margin-top:8px"><b>Two caveats:</b> the benchmark favours fusion (every decoy has a photo, but one true sighting per person does not, and real tips mostly won't), and it is synthetic throughout, with only 30 cases per setting. Read the rows against each other, not as real-world accuracy.</p>
+  </div>
 </section>
 
 <section id="app">

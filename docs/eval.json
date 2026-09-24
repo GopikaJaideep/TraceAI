@@ -105,6 +105,103 @@
      }
     }
    }
+  },
+  "hard": {
+   "cases": 30,
+   "sightings_ranked_per_case": 42,
+   "true_per_case": 3,
+   "metrics": {
+    "random": {
+     "p@3": {
+      "mean": 0.07,
+      "sd": 0.007
+     },
+     "hit@1": {
+      "mean": 0.069,
+      "sd": 0.011
+     },
+     "mrr": {
+      "mean": 0.209,
+      "sd": 0.01
+     },
+     "auroc": {
+      "mean": 0.498,
+      "sd": 0.011
+     }
+    },
+    "proximity": {
+     "p@3": {
+      "mean": 0.633,
+      "sd": 0.249
+     },
+     "hit@1": {
+      "mean": 0.667,
+      "sd": 0.471
+     },
+     "mrr": {
+      "mean": 0.814,
+      "sd": 0.268
+     },
+     "auroc": {
+      "mean": 0.975,
+      "sd": 0.023
+     }
+    },
+    "context": {
+     "p@3": {
+      "mean": 0.522,
+      "sd": 0.254
+     },
+     "hit@1": {
+      "mean": 0.4,
+      "sd": 0.49
+     },
+     "mrr": {
+      "mean": 0.654,
+      "sd": 0.293
+     },
+     "auroc": {
+      "mean": 0.959,
+      "sd": 0.028
+     }
+    },
+    "face": {
+     "p@3": {
+      "mean": 0.678,
+      "sd": 0.06
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 0.831,
+      "sd": 0.004
+     }
+    },
+    "full": {
+     "p@3": {
+      "mean": 0.956,
+      "sd": 0.113
+     },
+     "hit@1": {
+      "mean": 0.967,
+      "sd": 0.18
+     },
+     "mrr": {
+      "mean": 0.983,
+      "sd": 0.09
+     },
+     "auroc": {
+      "mean": 0.997,
+      "sd": 0.007
+     }
+    }
+   }
   }
  },
  "setting_notes": {
@@ -116,6 +213,7 @@
   "Faces are frontal LFW photos of public figures; 'other camera' is simulated with brightness, blur and downscaling, not real CCTV.",
   "Only 30 cases per setting (5 seeds x 6 identities): differences of a few points are noise.",
   "Only 2 of each person's 3 true sightings carry a photo, so face-only ranking cannot exceed precision@3 of about 0.67.",
+  "Every decoy carries a photo but one of each person's three true sightings does not, which favours fusion: mismatched faces push decoys down while the photo-less true sighting is not penalised. Real tips will mostly have no photo.",
   "Compare rows with each other; do not read any row as real-world accuracy."
  ]
 }

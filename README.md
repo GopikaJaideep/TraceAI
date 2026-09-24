@@ -82,15 +82,33 @@ precision@3 of about 0.07. 30 cases per setting, InsightFace `buffalo_sc`.
 | Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
 | **TraceAI: all signals fused** | **0.99 ± 0.06** | 1.00 | 1.00 | 1.00 |
 
-**How to read this honestly.** The standard setting is too easy: the report templates and the extraction
-rules were written together, so text alone is nearly perfect and fusion adds almost nothing. It does not show
-the value of combining signals. Face-only tops out near 0.67 because only 2 of each person's 3 true
-sightings carry a photo. To test what fusion is for, a **hard setting** (`--setting hard`) makes decoys
-match the outfit, area and confident wording of true sightings, so only the face separates them. Its
-numbers are on the [demo site](https://gopikajaideep.github.io/TraceAI/#results) and in `docs/eval.json`.
+The standard setting is too easy: the report templates and the extraction rules were written together, so
+text alone is nearly perfect and fusion adds almost nothing. It cannot show what combining signals is for.
 
-Caveats: synthetic data throughout; frontal photos of public figures, not CCTV; only 30 cases, so gaps of a
-few points are noise; do not read any row as real-world accuracy.
+**Hard setting** (`--setting hard`): decoys match the outfit, area and confident wording of true sightings,
+so only the face separates them.
+
+| Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
+|---|---|---|---|---|
+| Random ordering (expected value) | 0.07 ± 0.01 | 0.07 | 0.21 | 0.50 |
+| Proximity to last-known place only | 0.63 ± 0.25 | 0.67 | 0.81 | 0.97 |
+| Text, place, time and credibility (no face) | 0.52 ± 0.25 | 0.40 | 0.65 | 0.96 |
+| Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
+| **TraceAI: all signals fused** | **0.96 ± 0.11** | 0.97 | 0.98 | 1.00 |
+
+**How to read this honestly.** When text cannot separate the candidates, text-only ranking falls from 0.98
+to 0.52, and the face signal alone is capped near 0.67 because only 2 of each person's 3 true sightings
+carry a photo. Fusing the signals recovers 0.96. That is the case for combining them. Two things keep it
+from being a real-world claim:
+
+- **The benchmark favours fusion.** Every decoy carries a photo, but one of each person's true sightings
+  does not. Mismatched faces push decoys down while the photo-less true sighting is not penalised. Real
+  tips will mostly have no photo.
+- **It is synthetic throughout.** Frontal photos of public figures, not CCTV; reports and extraction rules
+  written together; only 30 cases per setting, so gaps of a few points are noise.
+
+Numbers are also on the [demo site](https://gopikajaideep.github.io/TraceAI/#results) and in
+`docs/eval.json`. Do not read any row as real-world accuracy.
 
 ## Misuse safeguards (what the code enforces)
 
