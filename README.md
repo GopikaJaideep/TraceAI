@@ -169,6 +169,8 @@ TRACEAI_PUBLIC_API_URL=http://localhost:8020 .venv/Scripts/python -m streamlit r
 
 - Officer console: http://localhost:8501 (sign in with the seeded `officer` or `admin` credentials).
 - Public portal: http://localhost:8502.
+- Run the Streamlit apps from the repo root: they read `.streamlit/config.toml`, which hides Streamlit's
+  developer toolbar (the Deploy button and menu) from end users.
 - If `TRACEAI_SECRET_KEY` is unset a throwaway key is used and sessions end whenever the API restarts.
 - `TRACEAI_FACE_MODEL`: `buffalo_l` (default, most accurate, ~280 MB) or `buffalo_sc` (~15 MB).
 - `TRACEAI_FACE_BACKEND=none` disables image scoring. `DATABASE_URL` defaults to SQLite in `data/`.

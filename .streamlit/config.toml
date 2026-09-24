@@ -1,0 +1,3 @@
+# Hide Streamlit developer chrome (Deploy button, developer menu) from end users.
+[client]
+toolbarMode = "minimal"

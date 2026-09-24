@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
 COPY traceai ./traceai
 COPY dashboard ./dashboard
 COPY public_portal ./public_portal
+COPY .streamlit ./.streamlit
 COPY scripts ./scripts
 
 ENV TRACEAI_DATA_DIR=/data
