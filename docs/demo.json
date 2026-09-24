@@ -1,0 +1,2486 @@
+{
+ "generated_note": "Synthetic data produced by the TraceAI pipeline. No real people, cases or photos.",
+ "weights": {
+  "image": 0.35,
+  "description": 0.15,
+  "proximity": 0.2,
+  "recency": 0.1,
+  "credibility": 0.2
+ },
+ "identity_floor": 0.4,
+ "scenarios": [
+  {
+   "title": "Confident witness with a matching photo",
+   "text": "I'm sure I saw the person at Federation Square in a grey hoodie around 2pm.",
+   "why": "Right place, right clothes, plausible timing, and a strong face match. This is what a top lead looks like.",
+   "face_cosine": 0.62,
+   "score": 0.8658,
+   "components": {
+    "image": 0.94,
+    "description": 0.5065122842788696,
+    "proximity": 0.9982134121112027,
+    "recency": 0.9348311920820395,
+    "credibility": 1.0
+   },
+   "notes": [
+    "0.2 km from last-known location",
+    "face cosine similarity 0.62"
+   ],
+   "extracted": {
+    "place": "Federation Square",
+    "clothing": [
+     "grey hoodie"
+    ],
+    "seen_at": "2026-09-19T14:00:00",
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Same report, no photo",
+   "text": "I'm sure I saw the person at Federation Square in a grey hoodie around 2pm.",
+   "why": "Without a photo the image signal is dropped and the other weights are renormalised, so a text-only report is not penalised for what it could not provide.",
+   "face_cosine": null,
+   "score": 0.6055,
+   "components": {
+    "image": null,
+    "description": 0.5065122842788696,
+    "proximity": 0.9982134121112027,
+    "recency": 0.9348311920820395,
+    "credibility": 0.95
+   },
+   "notes": [
+    "0.2 km from last-known location"
+   ],
+   "extracted": {
+    "place": "Federation Square",
+    "clothing": [
+     "grey hoodie"
+    ],
+    "seen_at": "2026-09-19T14:00:00",
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Hedged, vague report",
+   "text": "Maybe saw someone like that near Richmond, not sure, hard to tell from a distance.",
+   "why": "Hedging words lower credibility, and there is no clothing or time detail to check.",
+   "face_cosine": null,
+   "score": 0.4183,
+   "components": {
+    "image": null,
+    "description": 0.472339928150177,
+    "proximity": 0.9788526240569377,
+    "recency": null,
+    "credibility": 0.35000000000000003
+   },
+   "notes": [
+    "2.1 km from last-known location"
+   ],
+   "extracted": {
+    "place": "Richmond",
+    "clothing": [],
+    "seen_at": null,
+    "hedges": 4
+   }
+  },
+  {
+   "title": "Wrong outfit",
+   "text": "Definitely saw them at Southbank in a red t-shirt around 3pm.",
+   "why": "Location and timing are fine, but the description contradicts the profile. Identity evidence scales the score down, so a well-located report about someone else cannot rank like a match.",
+   "face_cosine": null,
+   "score": 0.4039,
+   "components": {
+    "image": null,
+    "description": 0.18851344287395477,
+    "proximity": 0.9947522813360418,
+    "recency": 0.9438743126816935,
+    "credibility": 0.95
+   },
+   "notes": [
+    "0.5 km from last-known location"
+   ],
+   "extracted": {
+    "place": "Southbank",
+    "clothing": [
+     "red t-shirt"
+    ],
+    "seen_at": "2026-09-19T15:00:00",
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Impossible journey",
+   "text": "Definitely saw them at Bondi Beach in a grey hoodie around 1pm.",
+   "why": "About 700 km in one hour is not physically possible. The lead scores 0 even with a strong face match.",
+   "face_cosine": 0.6,
+   "score": 0.0,
+   "components": {
+    "image": 0.8999999999999999,
+    "description": 0.49738624691963196,
+    "proximity": 0.0,
+    "recency": 0.9258747122872905,
+    "credibility": 1.0
+   },
+   "notes": [
+    "717 km in 1.0 h is not physically plausible"
+   ],
+   "extracted": {
+    "place": "Bondi Beach",
+    "clothing": [
+     "grey hoodie"
+    ],
+    "seen_at": "2026-09-19T13:00:00",
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Predates the last-known time",
+   "text": "Saw them near Flinders Street Station at 9am in a grey hoodie.",
+   "why": "The sighting is before the person was last seen. Chronology is checked even when no location is available.",
+   "face_cosine": 0.6,
+   "score": 0.0,
+   "components": {
+    "image": 0.8999999999999999,
+    "description": 0.5457669496536255,
+    "proximity": 0.0,
+    "recency": 0.8908987181403393,
+    "credibility": 0.9
+   },
+   "notes": [
+    "sighting predates the last-known time"
+   ],
+   "extracted": {
+    "place": "Flinders Street Station",
+    "clothing": [
+     "grey hoodie"
+    ],
+    "seen_at": "2026-09-19T09:00:00",
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Good photo, thin text",
+   "text": "Saw someone near Southbank.",
+   "why": "A strong face match carries a sparse report, but credibility stays modest because there is little detail to verify.",
+   "face_cosine": 0.55,
+   "score": 0.6775,
+   "components": {
+    "image": 0.8,
+    "description": 0.49316418170928955,
+    "proximity": 0.9947522813360418,
+    "recency": null,
+    "credibility": 0.7000000000000001
+   },
+   "notes": [
+    "0.5 km from last-known location",
+    "face cosine similarity 0.55"
+   ],
+   "extracted": {
+    "place": "Southbank",
+    "clothing": [],
+    "seen_at": null,
+    "hedges": 0
+   }
+  },
+  {
+   "title": "Perfect text, wrong face",
+   "text": "I'm sure I saw the person at Melbourne Central in a grey hoodie around 4pm.",
+   "why": "The photo does not match the profile, so the image component is 0 and drags an otherwise convincing report down.",
+   "face_cosine": 0.02,
+   "score": 0.4521,
+   "components": {
+    "image": 0.0,
+    "description": 0.6188059449195862,
+    "proximity": 0.9902807324449591,
+    "recency": 0.9530049122089577,
+    "credibility": 1.0
+   },
+   "notes": [
+    "1.0 km from last-known location",
+    "face cosine similarity 0.02"
+   ],
+   "extracted": {
+    "place": "Melbourne Central",
+    "clothing": [
+     "grey hoodie"
+    ],
+    "seen_at": "2026-09-19T16:00:00",
+    "hedges": 0
+   }
+  }
+ ],
+ "cases": [
+  {
+   "label": "Synthetic case A",
+   "city": "Melbourne",
+   "last_place": "Fitzroy",
+   "lat": -37.798,
+   "lng": 144.978,
+   "clothing": [
+    "brown coat",
+    "blue jeans"
+   ],
+   "last_seen": "2026-09-22T18:43:34.869802",
+   "corridor": "Fitzroy",
+   "leads": [
+    {
+     "score": 0.823,
+     "components": {
+      "image": null,
+      "description": 0.8,
+      "proximity": 0.989,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1.1 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.807,
+     "components": {
+      "image": 0.885,
+      "description": 0.51,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.59"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a brown coat. This was around 10:43pm.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.78,
+     "components": {
+      "image": 0.853,
+      "description": 0.527,
+      "proximity": 0.99,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1.0 km from last-known location",
+      "face cosine similarity 0.58"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.279,
+     "components": {
+      "image": 0.0,
+      "description": 0.299,
+      "proximity": 0.979,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "2.2 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.237,
+     "components": {
+      "image": null,
+      "description": 0.193,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "710.9 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.234,
+     "components": {
+      "image": 0.0,
+      "description": 0.217,
+      "proximity": 0.941,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "6.0 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "I think it could have been the person near Prahran from a distance. grey hoodie, hard to tell.",
+     "place": "Prahran",
+     "lat": -37.851,
+     "lng": 144.993,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.231,
+     "components": {
+      "image": 0.0,
+      "description": 0.2,
+      "proximity": 0.969,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "3.2 km from last-known location",
+      "face cosine similarity 0.08"
+     ],
+     "text": "Maybe saw someone like that at Southern Cross Station? Wearing a white shirt, not sure about the time, possibly 1:43pm.",
+     "place": "Southern Cross Station",
+     "lat": -37.8184,
+     "lng": 144.9525,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.216,
+     "components": {
+      "image": null,
+      "description": 0.139,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "709.3 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.177,
+     "components": {
+      "image": 0.0,
+      "description": 0.257,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "711.3 km from last-known location",
+      "face cosine similarity -0.13"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.162,
+     "components": {
+      "image": 0.0,
+      "description": 0.286,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "700.6 km from last-known location",
+      "face cosine similarity -0.00"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.158,
+     "components": {
+      "image": 0.0,
+      "description": 0.187,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "712.0 km from last-known location",
+      "face cosine similarity -0.15"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -37.80016765518969,
+     "lng": 144.97786421839643,
+     "place": "Fitzroy",
+     "size": 4
+    }
+   ]
+  },
+  {
+   "label": "Synthetic case B",
+   "city": "Sydney",
+   "last_place": "Central Station",
+   "lat": -33.8832,
+   "lng": 151.2067,
+   "clothing": [
+    "red t-shirt",
+    "black shorts"
+   ],
+   "last_seen": "2026-09-22T12:43:34.869802",
+   "corridor": "Surry Hills",
+   "leads": [
+    {
+     "score": 0.967,
+     "components": {
+      "image": 1.0,
+      "description": 0.786,
+      "proximity": 0.995,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "0.5 km from last-known location",
+      "face cosine similarity 0.66"
+     ],
+     "text": "I'm sure I saw the person at Surry Hills, in a red t-shirt and black shorts, at about 9:43pm.",
+     "place": "Surry Hills",
+     "lat": -33.885,
+     "lng": 151.2117,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.897,
+     "components": {
+      "image": 1.0,
+      "description": 0.446,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.66"
+     ],
+     "text": "Saw someone matching the description near Central Station wearing a red t-shirt around 4:43pm. Definitely looked like the photo.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.562,
+     "components": {
+      "image": null,
+      "description": 0.466,
+      "proximity": 0.989,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "1.1 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.374,
+     "components": {
+      "image": null,
+      "description": 0.157,
+      "proximity": 0.989,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "1.1 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.354,
+     "components": {
+      "image": 0.0,
+      "description": 0.505,
+      "proximity": 0.937,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "6.5 km from last-known location",
+      "face cosine similarity 0.04"
+     ],
+     "text": "Someone in a red t-shirt at Bondi Beach around 4:43pm. Might be them, probably not.",
+     "place": "Bondi Beach",
+     "lat": -33.8915,
+     "lng": 151.2767,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.29,
+     "components": {
+      "image": 0.0,
+      "description": 0.268,
+      "proximity": 0.984,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1.6 km from last-known location",
+      "face cosine similarity -0.09"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.281,
+     "components": {
+      "image": null,
+      "description": 0.258,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "709.8 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.256,
+     "components": {
+      "image": 0.0,
+      "description": 0.289,
+      "proximity": 0.815,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "20.4 km from last-known location",
+      "face cosine similarity 0.00"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.255,
+     "components": {
+      "image": 0.0,
+      "description": 0.179,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "2.5 km from last-known location",
+      "face cosine similarity -0.02"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.25,
+     "components": {
+      "image": 0.0,
+      "description": 0.25,
+      "proximity": 0.987,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "1.3 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "I think it could have been the person near Darling Harbour from a distance. grey hoodie, hard to tell.",
+     "place": "Darling Harbour",
+     "lat": -33.8737,
+     "lng": 151.199,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.228,
+     "components": {
+      "image": 0.0,
+      "description": 0.184,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Maybe saw someone like that at Central Station? Wearing a navy coat, not sure about the time, possibly 2:43am.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.226,
+     "components": {
+      "image": 0.0,
+      "description": 0.185,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2.5 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Maybe saw someone like that at Circular Quay? Wearing a white shirt, not sure about the time, possibly 9:43pm.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.225,
+     "components": {
+      "image": 0.0,
+      "description": 0.181,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2.5 km from last-known location",
+      "face cosine similarity -0.12"
+     ],
+     "text": "Maybe saw someone like that at Circular Quay? Wearing a green jumper, not sure about the time, possibly 4:43pm.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.166,
+     "components": {
+      "image": 0.0,
+      "description": 0.219,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "710.1 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a brown coat. This was around 10:43pm.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.162,
+     "components": {
+      "image": 0.0,
+      "description": 0.202,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "711.1 km from last-known location",
+      "face cosine similarity 0.05"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.157,
+     "components": {
+      "image": 0.0,
+      "description": 0.267,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "712.2 km from last-known location",
+      "face cosine similarity 0.04"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -33.88413389848692,
+     "lng": 151.2092941624637,
+     "place": "Surry Hills",
+     "size": 2
+    }
+   ]
+  },
+  {
+   "label": "Synthetic case C",
+   "city": "Brisbane",
+   "last_place": "Fortitude Valley",
+   "lat": -27.457,
+   "lng": 153.035,
+   "clothing": [
+    "navy coat",
+    "black trousers"
+   ],
+   "last_seen": "2026-09-21T23:43:34.869802",
+   "corridor": "Brisbane CBD",
+   "leads": [
+    {
+     "score": 0.847,
+     "components": {
+      "image": 0.867,
+      "description": 0.784,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.58"
+     ],
+     "text": "I'm sure I saw the person at Fortitude Valley, in a navy coat and black trousers, at about 3:43am.",
+     "place": "Fortitude Valley",
+     "lat": -27.457,
+     "lng": 153.035,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.798,
+     "components": {
+      "image": null,
+      "description": 0.771,
+      "proximity": 0.981,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1.9 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Roma Street Station, in a navy coat and black trousers, at about 1:43pm.",
+     "place": "Roma Street Station",
+     "lat": -27.4657,
+     "lng": 153.0187,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.791,
+     "components": {
+      "image": 0.859,
+      "description": 0.579,
+      "proximity": 0.983,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1.7 km from last-known location",
+      "face cosine similarity 0.58"
+     ],
+     "text": "Saw someone matching the description near Brisbane CBD wearing a navy coat around 8:43am. Definitely looked like the photo.",
+     "place": "Brisbane CBD",
+     "lat": -27.4698,
+     "lng": 153.0251,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.396,
+     "components": {
+      "image": null,
+      "description": 0.173,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "2.6 km from last-known location"
+     ],
+     "text": "Definitely saw them at South Bank, in a red t-shirt, around 3:43am.",
+     "place": "South Bank",
+     "lat": -27.4761,
+     "lng": 153.0203,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.394,
+     "components": {
+      "image": null,
+      "description": 0.164,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "0.0 km from last-known location"
+     ],
+     "text": "Definitely saw them at Fortitude Valley, in a red t-shirt, around 2:43pm.",
+     "place": "Fortitude Valley",
+     "lat": -27.457,
+     "lng": 153.035,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.295,
+     "components": {
+      "image": null,
+      "description": 0.291,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1374.0 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.284,
+     "components": {
+      "image": 0.0,
+      "description": 0.343,
+      "proximity": 0.983,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "1.7 km from last-known location",
+      "face cosine similarity 0.03"
+     ],
+     "text": "I think it could have been the person near Brisbane CBD from a distance. brown coat, hard to tell.",
+     "place": "Brisbane CBD",
+     "lat": -27.4698,
+     "lng": 153.0251,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.271,
+     "components": {
+      "image": null,
+      "description": 0.236,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "3607.4 km from last-known location"
+     ],
+     "text": "Definitely saw them at Perth Station, in a grey hoodie, around 12:43am.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.259,
+     "components": {
+      "image": null,
+      "description": 0.248,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "1375.8 km from last-known location"
+     ],
+     "text": "Spotted them outside Melbourne Central. They had on a red t-shirt. This was around 3:43pm.",
+     "place": "Melbourne Central",
+     "lat": -37.8102,
+     "lng": 144.9628,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.257,
+     "components": {
+      "image": 0.0,
+      "description": 0.236,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.00"
+     ],
+     "text": "Someone in a black jacket at Fortitude Valley around 7:43pm. Might be them, probably not.",
+     "place": "Fortitude Valley",
+     "lat": -27.457,
+     "lng": 153.035,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.245,
+     "components": {
+      "image": 0.0,
+      "description": 0.582,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "733.2 km from last-known location",
+      "face cosine similarity 0.06"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.236,
+     "components": {
+      "image": null,
+      "description": 0.189,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "734.5 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.223,
+     "components": {
+      "image": 0.0,
+      "description": 0.173,
+      "proximity": 0.981,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "1.9 km from last-known location",
+      "face cosine similarity -0.07"
+     ],
+     "text": "I think it could have been the person near Roma Street Station from a distance. green jumper, hard to tell.",
+     "place": "Roma Street Station",
+     "lat": -27.4657,
+     "lng": 153.0187,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.217,
+     "components": {
+      "image": null,
+      "description": 0.141,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "736.7 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.205,
+     "components": {
+      "image": 0.0,
+      "description": 0.494,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "735.6 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Maybe saw someone like that at Central Station? Wearing a navy coat, not sure about the time, possibly 2:43am.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.181,
+     "components": {
+      "image": 0.0,
+      "description": 0.272,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1374.0 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a brown coat. This was around 10:43pm.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.178,
+     "components": {
+      "image": 0.0,
+      "description": 0.224,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "735.7 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "I'm sure I saw the person at Surry Hills, in a red t-shirt and black shorts, at about 9:43pm.",
+     "place": "Surry Hills",
+     "lat": -33.885,
+     "lng": 151.2117,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.178,
+     "components": {
+      "image": 0.0,
+      "description": 0.261,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "734.0 km from last-known location",
+      "face cosine similarity -0.04"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.177,
+     "components": {
+      "image": 0.0,
+      "description": 0.26,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1374.0 km from last-known location",
+      "face cosine similarity -0.03"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a red t-shirt. This was around 10:43am.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.169,
+     "components": {
+      "image": 0.0,
+      "description": 0.229,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1374.7 km from last-known location",
+      "face cosine similarity -0.05"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.165,
+     "components": {
+      "image": 0.0,
+      "description": 0.213,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "733.1 km from last-known location",
+      "face cosine similarity 0.03"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.162,
+     "components": {
+      "image": 0.0,
+      "description": 0.286,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "1376.1 km from last-known location",
+      "face cosine similarity 0.05"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -27.46400585652158,
+     "lng": 153.02644485758825,
+     "place": "Brisbane CBD",
+     "size": 3
+    }
+   ]
+  },
+  {
+   "label": "Synthetic case D",
+   "city": "Perth",
+   "last_place": "Fremantle",
+   "lat": -32.0569,
+   "lng": 115.7439,
+   "clothing": [
+    "grey hoodie",
+    "blue jeans"
+   ],
+   "last_seen": "2026-09-21T17:43:34.869802",
+   "corridor": "Fremantle \u2192 Perth CBD",
+   "leads": [
+    {
+     "score": 0.876,
+     "components": {
+      "image": 0.892,
+      "description": 0.83,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.60"
+     ],
+     "text": "I'm sure I saw the person at Fremantle, in a grey hoodie and blue jeans, at about 9:43pm.",
+     "place": "Fremantle",
+     "lat": -32.0569,
+     "lng": 115.7439,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.728,
+     "components": {
+      "image": 0.818,
+      "description": 0.535,
+      "proximity": 0.852,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "16.1 km from last-known location",
+      "face cosine similarity 0.56"
+     ],
+     "text": "Saw someone matching the description near Perth CBD wearing a grey hoodie around 2:43am. Definitely looked like the photo.",
+     "place": "Perth CBD",
+     "lat": -31.9523,
+     "lng": 115.8613,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.609,
+     "components": {
+      "image": null,
+      "description": 0.549,
+      "proximity": 0.851,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "16.2 km from last-known location"
+     ],
+     "text": "Definitely saw them at Perth Station, in a grey hoodie, around 12:43am.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.598,
+     "components": {
+      "image": null,
+      "description": 0.566,
+      "proximity": 0.851,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "16.2 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Perth Station wearing a grey hoodie around 7:43am. Definitely looked like the photo.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.428,
+     "components": {
+      "image": null,
+      "description": 0.262,
+      "proximity": 0.851,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "16.2 km from last-known location"
+     ],
+     "text": "Definitely saw them at Perth Station, in a brown coat, around 8:43pm.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.362,
+     "components": {
+      "image": null,
+      "description": 0.481,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "3298.3 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.358,
+     "components": {
+      "image": null,
+      "description": 0.428,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "2729.4 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.256,
+     "components": {
+      "image": null,
+      "description": 0.241,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "2727.3 km from last-known location"
+     ],
+     "text": "Spotted them outside Melbourne Central. They had on a red t-shirt. This was around 3:43pm.",
+     "place": "Melbourne Central",
+     "lat": -37.8102,
+     "lng": 144.9628,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.254,
+     "components": {
+      "image": 0.0,
+      "description": 0.257,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity -0.09"
+     ],
+     "text": "I think it could have been the person near Fremantle from a distance. yellow jacket, hard to tell.",
+     "place": "Fremantle",
+     "lat": -32.0569,
+     "lng": 115.7439,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.251,
+     "components": {
+      "image": 0.0,
+      "description": 0.509,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "3298.6 km from last-known location",
+      "face cosine similarity 0.09"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.238,
+     "components": {
+      "image": 0.0,
+      "description": 0.466,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "3298.8 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.237,
+     "components": {
+      "image": 0.0,
+      "description": 0.257,
+      "proximity": 0.851,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "16.2 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Maybe saw someone like that at Perth Station? Wearing a green jumper, not sure about the time, possibly 10:43pm.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.223,
+     "components": {
+      "image": 0.0,
+      "description": 0.556,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "3297.5 km from last-known location",
+      "face cosine similarity -0.07"
+     ],
+     "text": "I think it could have been the person near Darling Harbour from a distance. grey hoodie, hard to tell.",
+     "place": "Darling Harbour",
+     "lat": -33.8737,
+     "lng": 151.199,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.221,
+     "components": {
+      "image": 0.0,
+      "description": 0.181,
+      "proximity": 0.834,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "18.1 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Someone in a red t-shirt at Scarborough around 11:43am. Might be them, probably not.",
+     "place": "Scarborough",
+     "lat": -31.8944,
+     "lng": 115.76,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.216,
+     "components": {
+      "image": null,
+      "description": 0.138,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "3297.7 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.205,
+     "components": {
+      "image": 0.0,
+      "description": 0.493,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2730.3 km from last-known location",
+      "face cosine similarity 0.12"
+     ],
+     "text": "I think it could have been the person near Prahran from a distance. grey hoodie, hard to tell.",
+     "place": "Prahran",
+     "lat": -37.851,
+     "lng": 144.993,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.182,
+     "components": {
+      "image": 0.0,
+      "description": 0.239,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "3298.6 km from last-known location",
+      "face cosine similarity -0.02"
+     ],
+     "text": "I'm sure I saw the person at Surry Hills, in a red t-shirt and black shorts, at about 9:43pm.",
+     "place": "Surry Hills",
+     "lat": -33.885,
+     "lng": 151.2117,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.168,
+     "components": {
+      "image": 0.0,
+      "description": 0.224,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "2728.5 km from last-known location",
+      "face cosine similarity 0.01"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a brown coat. This was around 10:43pm.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.163,
+     "components": {
+      "image": 0.06,
+      "description": 0.244,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "2727.3 km from last-known location",
+      "face cosine similarity 0.18"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.161,
+     "components": {
+      "image": 0.0,
+      "description": 0.198,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "2727.5 km from last-known location",
+      "face cosine similarity 0.03"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.152,
+     "components": {
+      "image": 0.0,
+      "description": 0.164,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "3298.1 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Saw someone matching the description near Central Station wearing a red t-shirt around 4:43pm. Definitely looked like the photo.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.151,
+     "components": {
+      "image": 0.0,
+      "description": 0.244,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "3280.1 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -32.0569,
+     "lng": 115.74390000000001,
+     "place": "Fremantle",
+     "size": 1
+    },
+    {
+     "lat": -31.95148004338383,
+     "lng": 115.86093557483726,
+     "place": "Perth CBD",
+     "size": 2
+    }
+   ]
+  },
+  {
+   "label": "Synthetic case E",
+   "city": "Melbourne",
+   "last_place": "Carlton",
+   "lat": -37.8002,
+   "lng": 144.9669,
+   "clothing": [
+    "red t-shirt",
+    "black shorts"
+   ],
+   "last_seen": "2026-09-22T01:43:34.869802",
+   "corridor": "Carlton",
+   "leads": [
+    {
+     "score": 0.91,
+     "components": {
+      "image": 1.0,
+      "description": 0.532,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.69"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a red t-shirt around 5:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.909,
+     "components": {
+      "image": 1.0,
+      "description": 0.537,
+      "proximity": 0.99,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1.0 km from last-known location",
+      "face cosine similarity 0.65"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a red t-shirt. This was around 10:43am.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.641,
+     "components": {
+      "image": null,
+      "description": 0.584,
+      "proximity": 0.988,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "1.2 km from last-known location"
+     ],
+     "text": "Spotted them outside Melbourne Central. They had on a red t-shirt. This was around 3:43pm.",
+     "place": "Melbourne Central",
+     "lat": -37.8102,
+     "lng": 144.9628,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.454,
+     "components": {
+      "image": null,
+      "description": 0.268,
+      "proximity": 0.981,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1.9 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.422,
+     "components": {
+      "image": null,
+      "description": 0.215,
+      "proximity": 0.981,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1.9 km from last-known location"
+     ],
+     "text": "Definitely saw them at Collingwood, in a navy coat, around 1:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.364,
+     "components": {
+      "image": null,
+      "description": 0.441,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1374.7 km from last-known location"
+     ],
+     "text": "Definitely saw them at Fortitude Valley, in a red t-shirt, around 2:43pm.",
+     "place": "Fortitude Valley",
+     "lat": -27.457,
+     "lng": 153.035,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.363,
+     "components": {
+      "image": 0.0,
+      "description": 0.781,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 1.0
+     },
+     "notes": [
+      "711.3 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "I'm sure I saw the person at Surry Hills, in a red t-shirt and black shorts, at about 9:43pm.",
+     "place": "Surry Hills",
+     "lat": -33.885,
+     "lng": 151.2117,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.357,
+     "components": {
+      "image": null,
+      "description": 0.469,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "710.2 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.28,
+     "components": {
+      "image": 0.0,
+      "description": 0.24,
+      "proximity": 0.99,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "1.0 km from last-known location",
+      "face cosine similarity 0.00"
+     ],
+     "text": "Spotted them outside Fitzroy. They had on a brown coat. This was around 10:43pm.",
+     "place": "Fitzroy",
+     "lat": -37.798,
+     "lng": 144.978,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.278,
+     "components": {
+      "image": 0.0,
+      "description": 0.297,
+      "proximity": 0.985,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "1.5 km from last-known location",
+      "face cosine similarity -0.04"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.273,
+     "components": {
+      "image": 0.0,
+      "description": 0.221,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity -0.04"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.266,
+     "components": {
+      "image": null,
+      "description": 0.224,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "2721.7 km from last-known location"
+     ],
+     "text": "Definitely saw them at Perth Station, in a grey hoodie, around 12:43am.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.263,
+     "components": {
+      "image": null,
+      "description": 0.216,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "1373.1 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Roma Street Station, in a navy coat and black trousers, at about 1:43pm.",
+     "place": "Roma Street Station",
+     "lat": -27.4657,
+     "lng": 153.0187,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.259,
+     "components": {
+      "image": null,
+      "description": 0.208,
+      "proximity": 0.0,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "2721.7 km from last-known location"
+     ],
+     "text": "Definitely saw them at Perth Station, in a brown coat, around 8:43pm.",
+     "place": "Perth Station",
+     "lat": -31.9505,
+     "lng": 115.8605,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.254,
+     "components": {
+      "image": 0.0,
+      "description": 0.309,
+      "proximity": 0.833,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "18.3 km from last-known location",
+      "face cosine similarity 0.07"
+     ],
+     "text": "Maybe saw someone like that at Melbourne Airport? Wearing a brown coat, not sure about the time, possibly 5:43am.",
+     "place": "Melbourne Airport",
+     "lat": -37.669,
+     "lng": 144.841,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.239,
+     "components": {
+      "image": 0.0,
+      "description": 0.222,
+      "proximity": 0.976,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2.4 km from last-known location",
+      "face cosine similarity 0.04"
+     ],
+     "text": "Maybe saw someone like that at Southern Cross Station? Wearing a white shirt, not sure about the time, possibly 1:43pm.",
+     "place": "Southern Cross Station",
+     "lat": -37.8184,
+     "lng": 144.9525,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.238,
+     "components": {
+      "image": 0.0,
+      "description": 0.219,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2.5 km from last-known location",
+      "face cosine similarity -0.02"
+     ],
+     "text": "Maybe saw someone like that at Southbank? Wearing a black jacket, not sure about the time, possibly 7:43am.",
+     "place": "Southbank",
+     "lat": -37.8226,
+     "lng": 144.9646,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.237,
+     "components": {
+      "image": 0.0,
+      "description": 0.465,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "711.1 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "Saw someone matching the description near Central Station wearing a red t-shirt around 4:43pm. Definitely looked like the photo.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.231,
+     "components": {
+      "image": 0.0,
+      "description": 0.179,
+      "proximity": 0.943,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "5.9 km from last-known location",
+      "face cosine similarity 0.08"
+     ],
+     "text": "Someone in a brown coat at Footscray around 5:43pm. Might be them, probably not.",
+     "place": "Footscray",
+     "lat": -37.8,
+     "lng": 144.8999,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.23,
+     "components": {
+      "image": 0.0,
+      "description": 0.206,
+      "proximity": 0.941,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "6.1 km from last-known location",
+      "face cosine similarity -0.07"
+     ],
+     "text": "I think it could have been the person near Prahran from a distance. grey hoodie, hard to tell.",
+     "place": "Prahran",
+     "lat": -37.851,
+     "lng": 144.993,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.224,
+     "components": {
+      "image": null,
+      "description": 0.159,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "711.8 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.218,
+     "components": {
+      "image": 0.0,
+      "description": 0.491,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "715.5 km from last-known location",
+      "face cosine similarity -0.03"
+     ],
+     "text": "Someone in a red t-shirt at Bondi Beach around 4:43pm. Might be them, probably not.",
+     "place": "Bondi Beach",
+     "lat": -33.8915,
+     "lng": 151.2767,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.175,
+     "components": {
+      "image": 0.0,
+      "description": 0.252,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "712.3 km from last-known location",
+      "face cosine similarity -0.08"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.154,
+     "components": {
+      "image": 0.0,
+      "description": 0.172,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "712.9 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.154,
+     "components": {
+      "image": 0.0,
+      "description": 0.255,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "701.5 km from last-known location",
+      "face cosine similarity 0.03"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -37.80199363233539,
+     "lng": 144.96993231000604,
+     "place": "Carlton",
+     "size": 3
+    }
+   ]
+  },
+  {
+   "label": "Synthetic case F",
+   "city": "Sydney",
+   "last_place": "Circular Quay",
+   "lat": -33.8611,
+   "lng": 151.2108,
+   "clothing": [
+    "grey hoodie",
+    "blue jeans"
+   ],
+   "last_seen": "2026-09-22T22:43:34.869802",
+   "corridor": "Circular Quay",
+   "leads": [
+    {
+     "score": 0.873,
+     "components": {
+      "image": 0.968,
+      "description": 0.471,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity 0.63"
+     ],
+     "text": "Spotted them outside Circular Quay. They had on a grey hoodie. This was around 2:43am.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.857,
+     "components": {
+      "image": 0.941,
+      "description": 0.539,
+      "proximity": 0.991,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "0.9 km from last-known location",
+      "face cosine similarity 0.62"
+     ],
+     "text": "Spotted them outside Sydney CBD. They had on a grey hoodie. This was around 7:43am.",
+     "place": "Sydney CBD",
+     "lat": -33.8688,
+     "lng": 151.2093,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.571,
+     "components": {
+      "image": null,
+      "description": 0.48,
+      "proximity": 0.986,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "1.4 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Town Hall wearing a grey hoodie around 12:43pm. Definitely looked like the photo.",
+     "place": "Town Hall",
+     "lat": -33.8732,
+     "lng": 151.2069,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.359,
+     "components": {
+      "image": null,
+      "description": 0.138,
+      "proximity": 0.965,
+      "recency": 1.0,
+      "credibility": 0.85
+     },
+     "notes": [
+      "3.6 km from last-known location"
+     ],
+     "text": "Saw someone matching the description near Redfern wearing a red t-shirt around 2:43am. Definitely looked like the photo.",
+     "place": "Redfern",
+     "lat": -33.8927,
+     "lng": 151.2036,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.355,
+     "components": {
+      "image": null,
+      "description": 0.421,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.95
+     },
+     "notes": [
+      "711.7 km from last-known location"
+     ],
+     "text": "I'm sure I saw the person at Collingwood, in a brown coat and blue jeans, at about 8:43am.",
+     "place": "Collingwood",
+     "lat": -37.8043,
+     "lng": 144.988,
+     "has_photo": false,
+     "flagged": false
+    },
+    {
+     "score": 0.256,
+     "components": {
+      "image": 0.0,
+      "description": 0.287,
+      "proximity": 0.818,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "20.0 km from last-known location",
+      "face cosine similarity 0.04"
+     ],
+     "text": "Someone in a navy coat at Parramatta around 11:43am. Might be them, probably not.",
+     "place": "Parramatta",
+     "lat": -33.815,
+     "lng": 151.0011,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.242,
+     "components": {
+      "image": 0.0,
+      "description": 0.214,
+      "proximity": 0.933,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "7.0 km from last-known location",
+      "face cosine similarity 0.02"
+     ],
+     "text": "Someone in a red t-shirt at Bondi Beach around 4:43pm. Might be them, probably not.",
+     "place": "Bondi Beach",
+     "lat": -33.8915,
+     "lng": 151.2767,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.232,
+     "components": {
+      "image": 0.0,
+      "description": 0.201,
+      "proximity": 0.975,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "2.5 km from last-known location",
+      "face cosine similarity 0.05"
+     ],
+     "text": "Maybe saw someone like that at Central Station? Wearing a navy coat, not sure about the time, possibly 2:43am.",
+     "place": "Central Station",
+     "lat": -33.8832,
+     "lng": 151.2067,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.22,
+     "components": {
+      "image": 0.0,
+      "description": 0.159,
+      "proximity": 1.0,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "0.0 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "Maybe saw someone like that at Circular Quay? Wearing a green jumper, not sure about the time, possibly 4:43pm.",
+     "place": "Circular Quay",
+     "lat": -33.8611,
+     "lng": 151.2108,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.207,
+     "components": {
+      "image": 0.0,
+      "description": 0.5,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.6
+     },
+     "notes": [
+      "714.4 km from last-known location",
+      "face cosine similarity -0.04"
+     ],
+     "text": "I think it could have been the person near Prahran from a distance. grey hoodie, hard to tell.",
+     "place": "Prahran",
+     "lat": -37.851,
+     "lng": 144.993,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.164,
+     "components": {
+      "image": 0.0,
+      "description": 0.212,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.9
+     },
+     "notes": [
+      "712.9 km from last-known location",
+      "face cosine similarity -0.00"
+     ],
+     "text": "Saw someone matching the description near Carlton wearing a brown coat around 3:43am. Definitely looked like the photo.",
+     "place": "Carlton",
+     "lat": -37.8002,
+     "lng": 144.9669,
+     "has_photo": true,
+     "flagged": false
+    },
+    {
+     "score": 0.154,
+     "components": {
+      "image": 0.0,
+      "description": 0.257,
+      "proximity": 0.001,
+      "recency": 1.0,
+      "credibility": 0.7
+     },
+     "notes": [
+      "714.1 km from last-known location",
+      "face cosine similarity -0.01"
+     ],
+     "text": "Someone in a black jacket at Melbourne CBD around 2:43pm. Might be them, probably not.",
+     "place": "Melbourne CBD",
+     "lat": -37.8136,
+     "lng": 144.9631,
+     "has_photo": true,
+     "flagged": false
+    }
+   ],
+   "clusters": [
+    {
+     "lat": -33.86491482595124,
+     "lng": 151.21005685208743,
+     "place": "Circular Quay",
+     "size": 2
+    }
+   ]
+  }
+ ],
+ "disclaimer": "TraceAI is a research prototype for educational and research purposes only. It uses public research datasets and synthetic profiles, contains no real missing-person cases, and is an investigative support tool, not an identification system. Every lead needs human review."
+}
