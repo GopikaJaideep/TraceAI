@@ -103,9 +103,13 @@ def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None
             clothing=outfit, last_place=home.name, last_lat=home.lat, last_lng=home.lng,
             last_seen_at=last_seen,
             photo_path=_save(images[profile_photo], f"profile_{idx}.jpg"),
+            police_reference=f"SYN-{idx + 1:04d}",  # obviously fake: no real case numbers
+            published=idx < 3,  # the first few appear on the public appeals page
+            public_summary=f"Synthetic demo appeal. Last seen in {city}, wearing a {outfit[0]}.",
         )
         vec = embedder.embed_file(person.photo_path)
         person.embedding = vec.tolist() if vec is not None else None
+        person.face_matching_authorised = vec is not None  # synthetic faces from a public research set
         profiles.append(person)
 
         near = sorted(anchors, key=lambda p: gazetteer.haversine_km(home.lat, home.lng, p.lat, p.lng))[1:4]
