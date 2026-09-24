@@ -23,6 +23,10 @@ WEIGHTS = {
 PROXIMITY_SCALE_KM = 100.0
 MAX_PLAUSIBLE_SPEED_KMH = 150.0
 RECENCY_HALF_LIFE_H = 72.0
+# Location, recency and credibility say a report is *usable*, not that it is about *this* person.
+# Identity evidence (face or description) therefore scales the score between these bounds; with no
+# identity evidence at all the factor is neutral.
+IDENTITY_FLOOR = 0.4
 
 
 @dataclass
@@ -79,7 +83,10 @@ def combine(components: dict[str, float | None]) -> float:
     total = sum(WEIGHTS[k] for k in available)
     if total == 0:
         return 0.0
-    return sum(WEIGHTS[k] * v for k, v in available.items()) / total
+    weighted = sum(WEIGHTS[k] * v for k, v in available.items()) / total
+    identity = [v for k in ("image", "description") if (v := components.get(k)) is not None]
+    factor = 0.5 * (1 + IDENTITY_FLOOR) if not identity else IDENTITY_FLOOR + (1 - IDENTITY_FLOOR) * max(identity)
+    return weighted * factor
 
 
 def score_lead(
