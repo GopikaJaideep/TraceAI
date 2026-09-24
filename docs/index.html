@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TraceAI: AI-assisted missing-person lead prioritisation</title>
+<meta name="description" content="Interactive demo of TraceAI, a multi-modal AI research prototype that ranks witness sightings for missing-person investigators. Synthetic data only.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230f766e'/%3E%3Cpath d='M16 6l4 10-4 10-4-10z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#f7f8f7; --surface:#fff; --ink:#14201d; --muted:#5b6b66; --line:#dfe5e2;
+  --accent:#0f766e; --accent-ink:#fff; --hi:#c2410c; --mid:#b45309; --lo:#64748b;
+  --bar:#0f766e; --bar-bg:#e6ecea; --warn-bg:#fff7e6; --warn-line:#f0d9a8;
+  --radius:12px; --shadow:0 1px 2px rgba(20,32,29,.06),0 4px 14px rgba(20,32,29,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1513; --surface:#141e1b; --ink:#e7efec; --muted:#9db0aa; --line:#243530;
+  --accent:#2dd4bf; --accent-ink:#06211d; --hi:#fb923c; --mid:#fbbf24; --lo:#94a3b8;
+  --bar:#2dd4bf; --bar-bg:#22322e; --warn-bg:#2a2412; --warn-line:#4a3f1c;
+  --shadow:none;}}
+:root[data-theme="dark"]{
+  --bg:#0d1513; --surface:#141e1b; --ink:#e7efec; --muted:#9db0aa; --line:#243530;
+  --accent:#2dd4bf; --accent-ink:#06211d; --hi:#fb923c; --mid:#fbbf24; --lo:#94a3b8;
+  --bar:#2dd4bf; --bar-bg:#22322e; --warn-bg:#2a2412; --warn-line:#4a3f1c; --shadow:none;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.nav{position:sticky;top:0;z-index:1000;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.brand{font-weight:700;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand i{width:22px;height:22px;border-radius:50%;background:var(--accent);display:inline-block}
+.nav nav{display:flex;gap:18px;margin-left:auto;font-size:14px}
+.nav nav a{color:var(--muted);text-decoration:none}.nav nav a:hover{color:var(--ink)}
+@media (max-width:640px){.nav nav a:not(.gh){display:none}}
+.hero{padding:64px 0 36px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.badge{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.badge.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--ink)}
+h1{font-size:clamp(32px,5.2vw,52px);line-height:1.08;letter-spacing:-.025em;margin:0 0 16px;max-width:18ch}
+.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:62ch;margin:0 0 26px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-block;padding:11px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:34px 0 8px}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em}.stat span{font-size:13px;color:var(--muted)}
+section{padding:44px 0}
+h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;margin:0 0 8px}
+.sub{color:var(--muted);max-width:66ch;margin:0 0 24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.demo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.demo{grid-template-columns:1fr}}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--line)}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
+.meta{font-size:13.5px;color:var(--muted)}
+#map{height:460px;border-radius:0 0 var(--radius) var(--radius)}
+@media (max-width:900px){#map{height:340px}}
+.corridor{margin:0 14px 12px;padding:8px 12px;border-radius:8px;background:var(--bar-bg);font-size:14px}
+.leads{max-height:560px;overflow:auto;padding:6px}
+.lead-item{display:flex;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid transparent;border-radius:10px;background:none;color:inherit;font:inherit;cursor:pointer}
+.lead-item:hover{background:var(--bg)}
+.lead-item[aria-pressed="true"]{border-color:var(--accent);background:var(--bg)}
+.pill{flex:none;min-width:48px;height:28px;border-radius:999px;color:#fff;font-weight:700;font-size:13.5px;display:grid;place-items:center;padding:0 8px}
+.pill.hi{background:var(--hi)}.pill.mid{background:var(--mid)}.pill.lo{background:var(--lo)}
+.lead-item .t{font-size:14px;line-height:1.4}.lead-item .p{font-size:12.5px;color:var(--muted)}
+.detail{padding:14px 16px;border-top:1px solid var(--line)}
+.detail h3{margin:0 0 6px;font-size:15px}
+.quote{font-size:14.5px;border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:6px 0 12px;color:var(--ink)}
+.bars{display:grid;gap:7px;margin:8px 0}
+.bar{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.bar .track{height:9px;border-radius:9px;background:var(--bar-bg);overflow:hidden}
+.bar .fill{height:100%;background:var(--bar);border-radius:9px}
+.bar .na{grid-column:2/4;color:var(--muted);font-style:italic}
+.bar span.w{color:var(--muted);font-size:11.5px}
+.eq{font-size:13.5px;background:var(--bar-bg);border-radius:8px;padding:8px 10px;margin-top:8px}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bar-bg);margin:0 4px 4px 0}
+.tag.flag{background:var(--warn-bg);border:1px solid var(--warn-line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.card{padding:16px}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
+.card h3{margin:0;font-size:16px;line-height:1.3}
+.card .why{font-size:13.5px;color:var(--muted);margin:10px 0 0}
+.chips{margin:6px 0 4px}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 28px}
+.step{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);font-size:14px}
+.step b{display:block;margin-bottom:4px}.step span{color:var(--muted);font-size:13px}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.zones{grid-template-columns:1fr}}
+.zone{padding:18px}.zone h3{margin:0 0 4px}.zone ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:14.5px}
+.zone.officer{border-color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.note{padding:18px}.note h3{margin:0 0 6px;font-size:16px}.note p{margin:0;color:var(--muted);font-size:14.5px}
+footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);font-size:13.5px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#top"><i aria-hidden="true"></i> TraceAI</a>
+  <nav aria-label="Sections">
+    <a href="#demo">Demo</a><a href="#scoring">Scoring</a><a href="#design">Design</a><a href="#safeguards">Safeguards</a>
+    <a class="gh" href="https://github.com/GopikaJaideep/TraceAI">GitHub</a>
+  </nav>
+</div></header>
+
+<main id="top">
+<div class="wrap">
+<section class="hero">
+  <div class="badges">
+    <span class="badge warn">Research prototype · synthetic data only</span>
+    <span class="badge">Python · FastAPI · InsightFace · spaCy · Streamlit · PostgreSQL · Docker</span>
+  </div>
+  <h1>Ranking witness sightings for missing-person investigators</h1>
+  <p class="lead">TraceAI combines face similarity, natural-language extraction, geospatial clustering and a lead-scoring model, so investigators review the most promising sightings first. Police use it, the public can only report, and misuse is designed against from the start.</p>
+  <div class="cta">
+    <a class="btn primary" href="#demo">Explore the live demo</a>
+    <a class="btn" href="https://github.com/GopikaJaideep/TraceAI">View the code</a>
+  </div>
+  <div class="stats" aria-label="Project facts">
+    <div class="stat"><b>48</b><span>automated tests, each safeguard checked by breaking it</span></div>
+    <div class="stat"><b>5</b><span>fused signals per lead: face, text, place, recency, credibility</span></div>
+    <div class="stat"><b>2</b><span>separate trust zones: public tips, officer console</span></div>
+    <div class="stat"><b>0</b><span>real people, cases or photos, all data is synthetic</span></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>Explore a synthetic case</h2>
+  <p class="sub">Every case, sighting and score below was produced by the project's real pipeline on invented data. Pick a case, click a lead on the map or in the list, and see exactly why it ranked where it did.</p>
+  <div class="demo">
+    <div class="panel">
+      <div class="toolbar">
+        <span class="avatar" id="avatar" aria-hidden="true"></span>
+        <label class="sr" for="caseSel">Case</label>
+        <select id="caseSel"></select>
+        <span class="meta" id="caseMeta"></span>
+      </div>
+      <div class="corridor" id="corridor" hidden></div>
+      <div id="map" role="application" aria-label="Map of the case and its sightings"></div>
+    </div>
+    <div class="panel">
+      <div class="toolbar"><b>Prioritised leads</b><span class="meta" id="leadCount"></span></div>
+      <div class="leads" id="leads"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+  <p class="meta" style="margin-top:10px">Marker colour and size show the score (orange is high, grey is low). A grey ring means the report was flagged for reviewer scepticism. Faces are not shown: the project's test photos are of real people, so the demo shows only the match scores.</p>
+</section>
+
+<section id="scoring">
+  <h2>Why did it score that?</h2>
+  <p class="sub">Eight reports about the same person (last seen at Flinders Street Station at midday, grey hoodie), run through the real scoring code. Watch the score move as one thing changes.</p>
+  <div class="cards" id="cards"></div>
+  <div class="panel note" style="margin-top:14px">
+    <h3>How a lead score is built</h3>
+    <p id="formula"></p>
+  </div>
+</section>
+
+<section id="design">
+  <h2>How it works</h2>
+  <p class="sub">A modular pipeline turns a report and an optional photo into ranked, explainable leads.</p>
+  <div class="flow">
+    <div class="step"><b>1 · Ingest</b><span>Free-text report and optional photo. Photos are verified, re-encoded and stripped of GPS metadata.</span></div>
+    <div class="step"><b>2 · Understand</b><span>Rules and spaCy pull out place, clothing and time from the text. Hedging lowers credibility.</span></div>
+    <div class="step"><b>3 · Compare</b><span>ArcFace embeddings for face similarity, semantic similarity for descriptions.</span></div>
+    <div class="step"><b>4 · Score</b><span>Five signals fused. Impossible journeys and out-of-order timelines score zero.</span></div>
+    <div class="step"><b>5 · Map</b><span>DBSCAN clusters strong sightings and infers a movement corridor.</span></div>
+  </div>
+  <h2 style="font-size:22px">Two trust zones</h2>
+  <p class="sub">The public and the police never share a process. The public app does not contain the officer routes at all.</p>
+  <div class="zones">
+    <div class="panel zone"><h3>Public zone</h3><span class="meta">Anyone</span>
+      <ul><li>Read police-published appeals (city-level location only)</li><li>Submit a tip, with rate limits, consent and a honeypot</li><li>Receives only a random receipt, never a score, match or case</li></ul></div>
+    <div class="panel zone officer"><h3>Officer zone</h3><span class="meta">Verified police and partner-agency staff</span>
+      <ul><li>Login, lockout and per-case need-to-know access</li><li>Ranked leads with a per-signal breakdown, on a map</li><li>Every read and change in a tamper-evident audit log</li></ul></div>
+  </div>
+</section>
+
+<section id="safeguards">
+  <h2>Designed against misuse</h2>
+  <p class="sub">A tool like this can be abused, so the risks are part of the design and each control has a test.</p>
+  <div class="panel scroll"><table>
+    <thead><tr><th>Risk</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td><b>Stalking someone who fled an abuser</b>, via a "missing" report</td><td>Cases open only from a police reference plus a family-violence screening attestation. The public never searches, sees matches or sees exact locations.</td></tr>
+      <tr><td><b>Probing the tip form</b> to locate someone</td><td>A tip returns only a receipt. Tipsters are never told whether anything matched.</td></tr>
+      <tr><td><b>Fake or malicious tips</b></td><td>Rate limits, consent and false-report notice, honeypot, and flagging of repeat sources and duplicate text. Tips only join a review queue, so they never trigger action.</td></tr>
+      <tr><td><b>Insider snooping</b></td><td>Per-case need-to-know (even admins are blocked), hash-chained audit log, and reading the log is itself logged.</td></tr>
+      <tr><td><b>Face-matching abuse</b></td><td>Off unless the officer attests the photo was lawfully obtained. Results are similarity scores for human review, never names.</td></tr>
+      <tr><td><b>Keeping data forever</b></td><td>Closing a case deletes its photo, face embedding and leads. Public tips expire after 90 days.</td></tr>
+    </tbody></table></div>
+  <p class="meta" style="margin-top:12px">Not a substitute for legal review, privacy impact assessment, bias testing or a security audit, which the repository lists as required before any real use.</p>
+</section>
+
+<section>
+  <h2>Engineering notes</h2>
+  <div class="grid2">
+    <div class="panel note"><h3>Tests that actually bite</h3><p>The access-control suite runs through the real HTTP layer. I broke each safeguard on purpose to confirm a test fails, and that exposed one weak test, now fixed.</p></div>
+    <div class="panel note"><h3>Bugs found and fixed</h3><p>Ranking evaluation caught synthetic faces coming out black (a float-to-uint8 scaling bug) and wrong-person text reports outranking real matches. An automated review found four more, all fixed with regression tests.</p></div>
+    <div class="panel note"><h3>Honest about limits</h3><p>Scores are heuristic and tuned on synthetic data. The place list is about 50 landmarks, not full OpenStreetMap. The README states these, plus what is required before real use.</p></div>
+    <div class="panel note"><h3>Stack</h3><p>FastAPI, SQLAlchemy (SQLite or PostgreSQL), InsightFace/ArcFace, spaCy, sentence-transformers, scikit-learn DBSCAN, Streamlit, Docker Compose.</p></div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <p id="disclaimer"></p>
+  <p>Source and documentation: <a href="https://github.com/GopikaJaideep/TraceAI">github.com/GopikaJaideep/TraceAI</a>. Map data © OpenStreetMap contributors.</p>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const tier = (s) => (s >= 0.6 ? "hi" : s >= 0.4 ? "mid" : "lo");
+  const COLOURS = { hi: "#c2410c", mid: "#b45309", lo: "#64748b" };
+  const LABELS = { image: "Face match", description: "Description", proximity: "Proximity", recency: "Recency", credibility: "Credibility" };
+  const AVATARS = ["#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f"];
+  let DATA, map, layer, current, selected;
+
+  fetch("demo.json").then((r) => r.json()).then((d) => { DATA = d; init(); })
+    .catch(() => { $("demo").append(el("p", "meta", "The demo data could not be loaded. Please try refreshing the page.")); });
+
+  function bars(components, weights) {
+    const box = el("div", "bars");
+    Object.keys(LABELS).forEach((k) => {
+      const row = el("div", "bar"); row.append(el("span", null, LABELS[k]));
+      const v = components[k];
+      if (v == null) { row.append(el("span", "na", "not available: weight redistributed")); }
+      else {
+        const t = el("div", "track"), f = el("div", "fill"); f.style.width = Math.round(v * 100) + "%"; t.append(f);
+        row.append(t, el("span", null, v.toFixed(2)));
+      }
+      box.append(row);
+    });
+    return box;
+  }
+
+  function equation(components, score, notes) {
+    const w = DATA.weights, avail = Object.keys(w).filter((k) => components[k] != null);
+    const hard = score === 0 && notes.some((n) => /plausible|predates/.test(n));
+    if (hard) return "Hard rule: " + notes.find((n) => /plausible|predates/.test(n)) + ", so the lead scores 0 whatever the other signals say.";
+    const total = avail.reduce((a, k) => a + w[k], 0);
+    const weighted = avail.reduce((a, k) => a + w[k] * components[k], 0) / total;
+    const ident = ["image", "description"].filter((k) => components[k] != null).map((k) => components[k]);
+    const f = ident.length ? DATA.identity_floor + (1 - DATA.identity_floor) * Math.max(...ident) : (1 + DATA.identity_floor) / 2;
+    return "Weighted average " + weighted.toFixed(2) + " × identity factor " + f.toFixed(2) + " = " + (weighted * f).toFixed(2);
+  }
+
+  function init() {
+    $("disclaimer").textContent = DATA.disclaimer;
+    const w = DATA.weights;
+    $("formula").textContent = "Each signal is scored 0 to 1 and combined as a weighted average (face " + w.image + ", description " + w.description +
+      ", proximity " + w.proximity + ", recency " + w.recency + ", credibility " + w.credibility + "). Signals a report cannot provide are dropped and the rest renormalised. The result is then scaled by an identity factor of " +
+      DATA.identity_floor + " + " + (1 - DATA.identity_floor).toFixed(1) + " × the strongest identity evidence (face or description), so a well-located report about someone else cannot rank like a match. Physically impossible journeys and sightings before the last-known time are set to 0.";
+
+    DATA.scenarios.forEach((s) => {
+      const c = el("article", "panel card"), h = el("header");
+      h.append(el("h3", null, s.title), el("span", "pill " + tier(s.score), s.score.toFixed(2)));
+      c.append(h, el("p", "quote", "“" + s.text + "”"));
+      const chips = el("div", "chips");
+      const ex = s.extracted;
+      if (ex.place) chips.append(el("span", "tag", "place: " + ex.place));
+      ex.clothing.forEach((x) => chips.append(el("span", "tag", "clothing: " + x)));
+      if (ex.seen_at) chips.append(el("span", "tag", "time: " + ex.seen_at.slice(11, 16)));
+      if (ex.hedges) chips.append(el("span", "tag flag", "hedging ×" + ex.hedges));
+      chips.append(el("span", "tag", s.face_cosine == null ? "no photo" : "face cosine " + s.face_cosine.toFixed(2)));
+      c.append(chips, bars(s.components), el("div", "eq", equation(s.components, s.score, s.notes)), el("p", "why", s.why));
+      $("cards").append(c);
+    });
+
+    const sel = $("caseSel");
+    DATA.cases.forEach((c, i) => { const o = el("option", null, c.label + " · " + c.city); o.value = i; sel.append(o); });
+    sel.addEventListener("change", () => showCase(+sel.value));
+    map = L.map("map", { scrollWheelZoom: false });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap contributors" }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+    showCase(0);
+  }
+
+  function showCase(i) {
+    current = DATA.cases[i]; selected = null;
+    const av = $("avatar"); av.style.background = AVATARS[i % AVATARS.length]; av.textContent = current.label.slice(-1);
+    $("caseMeta").textContent = "Last seen " + current.last_place + ", " + current.last_seen.slice(0, 10) + " · " + current.clothing.join(", ");
+    const cor = $("corridor");
+    cor.hidden = !current.corridor; if (current.corridor) cor.textContent = "Inferred movement corridor: " + current.corridor;
+    const list = $("leads"); list.replaceChildren();
+    $("leadCount").textContent = current.leads.length + " above 0.15";
+    current.leads.forEach((l, idx) => {
+      const b = el("button", "lead-item"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.dataset.i = idx;
+      b.append(el("span", "pill " + tier(l.score), l.score.toFixed(2)));
+      const t = el("span"); t.append(el("div", "t", l.text.length > 92 ? l.text.slice(0, 90) + "…" : l.text),
+        el("div", "p", (l.place || "place unresolved") + (l.has_photo ? " · photo" : "") + (l.flagged ? " · flagged" : "")));
+      b.append(t); b.addEventListener("click", () => select(idx)); list.append(b);
+    });
+    drawMap(); select(current.leads.length ? 0 : null);
+  }
+
+  let markers = [];
+  function drawMap() {
+    layer.clearLayers(); markers = [];
+    const pts = [[current.lat, current.lng]];
+    L.circleMarker([current.lat, current.lng], { radius: 9, color: "#111", weight: 3, fillColor: "#fff", fillOpacity: 1 }).bindTooltip("Last known: " + current.last_place).addTo(layer);
+    current.clusters.filter((c) => c.size >= 2).forEach((c) => L.circle([c.lat, c.lng], { radius: 1500, color: "#7c3aed", weight: 1.5, fill: false, dashArray: "4 4" }).addTo(layer));
+    current.leads.forEach((l, idx) => {
+      if (l.lat == null) { markers[idx] = null; return; }
+      const t = tier(l.score);
+      const m = L.circleMarker([l.lat, l.lng], { radius: 6 + 10 * l.score, color: l.flagged ? "#64748b" : COLOURS[t], weight: l.flagged ? 3 : 1, fillColor: COLOURS[t], fillOpacity: 0.55 })
+        .bindTooltip(l.score.toFixed(2) + " · " + (l.place || "unresolved")).addTo(layer);
+      m.on("click", () => select(idx)); markers[idx] = m; pts.push([l.lat, l.lng]);
+    });
+    map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 14 });
+    setTimeout(() => map.invalidateSize(), 50);
+  }
+
+  function select(idx) {
+    selected = idx;
+    document.querySelectorAll(".lead-item").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === idx)));
+    markers.forEach((m, i) => { if (m) m.setStyle({ weight: i === idx ? 4 : (current.leads[i].flagged ? 3 : 1), color: i === idx ? "#111" : (current.leads[i].flagged ? "#64748b" : COLOURS[tier(current.leads[i].score)]) }); });
+    const d = $("detail"); d.replaceChildren();
+    if (idx == null) { d.append(el("p", "meta", "No leads for this case.")); return; }
+    const l = current.leads[idx];
+    d.append(el("h3", null, "Why " + l.score.toFixed(2) + "?"), el("p", "quote", "“" + l.text + "”"));
+    if (l.flagged) d.append(el("p", "tag flag", "Flagged: repeat source or duplicate text, so a reviewer should be extra careful"));
+    d.append(bars(l.components), el("div", "eq", equation(l.components, l.score, l.notes)));
+    l.notes.forEach((n) => d.append(el("div", "meta", "· " + n)));
+    if (markers[idx]) markers[idx].openTooltip();
+  }
+})();
+</script>
+</body>
+</html>
