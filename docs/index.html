@@ -212,7 +212,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   <p class="sub">The public and the police never share a process. The public app does not contain the officer routes at all.</p>
   <div class="zones">
     <div class="panel zone"><h3>Public zone</h3><span class="meta">Anyone</span>
-      <ul><li>Read police-published appeals (city-level location only)</li><li>Submit a tip, with rate limits, consent and a honeypot</li><li>Receives only a random receipt, never a score, match or case</li></ul></div>
+      <ul><li>Read police-published appeals (city-level location only)</li><li>Submit a tip, with rate limits and a consent notice (the API also supports a honeypot field for custom front ends)</li><li>Receives only a random receipt, never a score, match or case</li></ul></div>
     <div class="panel zone officer"><h3>Officer zone</h3><span class="meta">Verified police and partner-agency staff</span>
       <ul><li>Login, lockout and per-case need-to-know access</li><li>Ranked leads with a per-signal breakdown, on a map</li><li>Every read and change in a tamper-evident audit log</li></ul></div>
   </div>
@@ -226,7 +226,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
     <tbody>
       <tr><td><b>Stalking someone who fled an abuser</b>, via a "missing" report</td><td>Cases open only from a police reference plus a family-violence screening attestation. The public never searches, sees matches or sees exact locations.</td></tr>
       <tr><td><b>Probing the tip form</b> to locate someone</td><td>A tip returns only a receipt. Tipsters are never told whether anything matched.</td></tr>
-      <tr><td><b>Fake or malicious tips</b></td><td>Rate limits, consent and false-report notice, honeypot, and flagging of repeat sources and duplicate text. Tips only join a review queue, so they never trigger action.</td></tr>
+      <tr><td><b>Fake or malicious tips</b></td><td>Rate limits, consent and false-report notice, a honeypot field (enforced by the API; the bundled Streamlit form does not include it), and flagging of repeat sources and duplicate text. Tips only join a review queue, so they never trigger action.</td></tr>
       <tr><td><b>Insider snooping</b></td><td>Per-case need-to-know (even admins are blocked), hash-chained audit log, and reading the log is itself logged.</td></tr>
       <tr><td><b>Face-matching abuse</b></td><td>Off unless the officer attests the photo was lawfully obtained. Results are similarity scores for human review, never names.</td></tr>
       <tr><td><b>Keeping data forever</b></td><td>Closing a case deletes its photo, face embedding and leads. Public tips expire after 90 days.</td></tr>
