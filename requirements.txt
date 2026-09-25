@@ -1,20 +1,28 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-psycopg2-binary
-pydantic
-python-multipart
-numpy
-pandas
-scikit-learn
-pillow
-opencv-python-headless
-onnxruntime
-folium
-streamlit
-streamlit-folium
-spacy
-sentence-transformers
-httpx
-pytest
-itsdangerous
+# Direct dependencies, pinned to the versions the tests and the evaluation were run with
+# (Python 3.13 locally; CI also runs 3.12, which the Docker image uses; 3.12 is the minimum because the
+# pinned numpy no longer supports 3.11). Transitive dependencies are
+# still resolved by pip, so this is reproducible but not a full lock file.
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+sqlalchemy==2.0.54
+psycopg2-binary==2.9.13
+pydantic==2.13.5
+python-multipart==0.0.32
+itsdangerous==2.2.0
+httpx==0.28.1
+
+numpy==2.5.3
+pandas==3.0.6
+scikit-learn==1.9.1
+pillow==12.3.0
+opencv-python-headless==5.0.0.93
+onnxruntime==1.30.0
+insightface==2.0
+spacy==3.8.16
+sentence-transformers==6.1.0
+
+folium==0.20.0
+streamlit==1.64.0
+streamlit-folium==0.27.4
+
+pytest==9.1.1

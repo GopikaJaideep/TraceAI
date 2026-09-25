@@ -1,12 +1,14 @@
-fastapi
-sqlalchemy
-pydantic
-python-multipart
-numpy
-pandas
-scikit-learn
-pillow
-opencv-python-headless
-itsdangerous
-httpx
-pytest
+# Lean set for CI: enough to run the tests and the safeguard check, without torch, spaCy or Streamlit.
+# Pinned to the versions verified together (see requirements.txt for the full runtime set).
+fastapi==0.141.1
+sqlalchemy==2.0.54
+pydantic==2.13.5
+python-multipart==0.0.32
+numpy==2.5.3
+pandas==3.0.6
+scikit-learn==1.9.1
+pillow==12.3.0
+opencv-python-headless==5.0.0.93
+itsdangerous==2.2.0
+httpx==0.28.1
+pytest==9.1.1
