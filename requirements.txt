@@ -1,5 +1,6 @@
 # Direct dependencies, pinned to the versions the tests and the evaluation were run with
-# (Python 3.13 locally; CI also runs 3.11, which the Docker image uses). Transitive dependencies are
+# (Python 3.13 locally; CI also runs 3.12, which the Docker image uses; 3.12 is the minimum because the
+# pinned numpy no longer supports 3.11). Transitive dependencies are
 # still resolved by pip, so this is reproducible but not a full lock file.
 fastapi==0.141.1
 uvicorn[standard]==0.53.0

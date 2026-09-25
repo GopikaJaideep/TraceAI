@@ -197,7 +197,8 @@ round-trip through the database. If you would rather not use Docker, the manual 
 .venv/Scripts/python -m scripts.mutation_check    # breaks 10 safeguards one at a time; the tests must fail each time
 ```
 
-CI runs the tests on Python 3.11 and 3.13, runs `mutation_check` (so "each safeguard was verified by
+CI runs the tests on Python 3.12 and 3.13 (the minimum is 3.12, because the pinned numpy no longer supports
+3.11), runs `mutation_check` (so "each safeguard was verified by
 breaking it" is reproducible rather than a claim), and runs the Docker smoke test.
 
 ## Reproducing the screenshots and results
