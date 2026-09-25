@@ -71,7 +71,7 @@ cannot leak them through a bug or misconfiguration.
 `python -m scripts.evaluate` ranks 42 sightings per case, of which 3 are true sightings of that case's
 person (a different photo of the same identity, degraded to mimic another camera). Random ordering gets
 precision@3 of about 0.07. 30 cases per setting (5 seeds × 6 identities), InsightFace `buffalo_sc`. "±" is the
-standard deviation across cases.
+standard deviation across cases, so each mean has a standard error of roughly a fifth of that.
 
 **Standard setting**: decoys wear a different outfit or hedge their wording.
 
@@ -83,12 +83,40 @@ standard deviation across cases.
 | Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
 | **TraceAI: all signals fused** | **0.94 ± 0.12** | 1.00 | 1.00 | 1.00 |
 
-Here the report templates and the extraction rules were written together, so text alone already does well
-and fusion adds little: 0.91 to 0.94 is within the noise (each mean has a standard error of about 0.03).
-This setting cannot show what combining signals is for.
+The report templates and the extraction rules were written together, so text alone already does well and
+fusion adds little: 0.91 to 0.94 is within the noise. This setting cannot show what combining signals is for.
 
-**Hard setting** (`--setting hard`): decoys have the same outfit, the same confident wording, and the same
-places and times as true sightings, so only the face separates them.
+**Photo availability: the fair test.** Decoys have the same outfit, the same confident wording, and the
+same places and times as true sightings (`--setting photo-rate`), so text cannot separate them. Every tip,
+true or decoy, then keeps its photo with the probability shown, **independent of whether it is a true
+sighting**. Most real tips will not have a photo, so this is the question that matters.
+
+| Tips with a photo | Text only (no face) | Face only | **All signals fused** | Fused: top-1 correct |
+|---|---|---|---|---|
+| 20% | 0.49 ± 0.22 | 0.22 ± 0.18 | **0.62 ± 0.22** | 0.73 |
+| 50% | 0.50 ± 0.21 | 0.54 ± 0.28 | **0.81 ± 0.20** | 0.93 |
+| 100% | 0.49 ± 0.22 | 1.00 ± 0.00 | **1.00 ± 0.00** | 1.00 |
+
+Precision@3, random ordering is 0.07. Full tables for each rate are in `docs/eval.json`.
+
+**How to read this honestly.**
+
+- **Text alone sits at about 0.5 in every row.** With look-alike decoys it is at chance among the six
+  candidates (3 true, 3 decoys), by construction.
+- **Fusion beats both single signals when photos are scarce or mixed:** 0.62 against 0.49 and 0.22 at 20%,
+  0.81 against 0.50 and 0.54 at 50%. Face alone cannot rank a tip that has no photo, and text alone cannot
+  tell look-alikes apart. Fused ranking uses text to lift the look-alike group above the unrelated tips and
+  the face to choose within it. The gaps are several standard errors (each mean's is about 0.04).
+- **At 100% the face alone is already perfect.** Synthetic frontal photos of public figures are easy for
+  the face model, so 1.00 is a ceiling from easy data, not a claim.
+- **Low photo rates are limited by information, not only by method.** A true sighting with look-alike text
+  and no photo has nothing that separates it from a photo-less decoy, so no ranking could do much better
+  without more signals.
+- **It is synthetic throughout:** reports and extraction rules written together, invented profiles, 30
+  cases per setting. Do not read any row as real-world accuracy.
+
+**Hard setting (kept for comparison, not for the headline).** The same look-alike decoys as above, but every
+decoy carries a photo while one true sighting per person does not.
 
 | Ranking method | Precision@3 | Top-1 correct | MRR | AUROC |
 |---|---|---|---|---|
@@ -96,27 +124,19 @@ places and times as true sightings, so only the face separates them.
 | Proximity to last-known place only | 0.39 ± 0.17 | 0.43 | 0.68 | 0.94 |
 | Text, place, time and credibility (no face) | 0.48 ± 0.24 | 0.40 | 0.65 | 0.95 |
 | Face similarity only | 0.68 ± 0.06 | 1.00 | 1.00 | 0.83 |
-| **TraceAI: all signals fused** | **0.96 ± 0.11** | 0.97 | 0.98 | 1.00 |
+| TraceAI: all signals fused | 0.96 ± 0.11 | 0.97 | 0.98 | 1.00 |
 
-**How to read this honestly.**
+Its 0.96 is inflated. Mismatched faces push the photo-bearing decoys down while the photo-less true
+sighting is not penalised, so the fused ranking looks better than it should. That bias is why the photo
+availability test above exists; its numbers at realistic photo rates (0.62 and 0.81) are the ones to quote.
 
-- Without the face, ranking is at chance among the six look-alike candidates (3 true, 3 decoys, so about
-  0.5 is what guessing gives). The face alone is capped near 0.67 because only 2 of each person's 3 true
-  sightings carry a photo.
-- Fused ranking scores 0.96, above the face-only cap. **That gain comes from an asymmetry in the benchmark,
-  not only from good fusion:** every decoy carries a photo, but one true sighting per person does not.
-  Mismatched faces push decoys down, and the photo-less true sighting is not penalised, so it ranks above
-  them. Real tips will mostly have no photo, so treat 0.96 as an upper bound. A fairer test would give most
-  decoys no photo too; I have not run it.
-- It is synthetic throughout: frontal photos of public figures, not CCTV; reports and extraction rules
-  written together; 30 cases per setting, so gaps of a few points are noise.
-
-Earlier versions of this benchmark had two flaws that flattered the results (a decoy could reuse another
-case's face, and hard-setting decoys were easier to place than true sightings). Both are fixed and the run
-now asserts the first can't recur, so these numbers are lower than the ones first published in the PR.
+**How the benchmark changed.** Earlier versions had two flaws that flattered the results (a decoy could
+reuse another case's face, and hard-setting decoys were easier to place than true sightings). Both are fixed
+and the run asserts the first cannot recur. The hard setting's photo bias was found afterwards and is
+addressed by the photo-availability test. Each fix lowered the published numbers.
 
 Numbers are also on the [demo site](https://gopikajaideep.github.io/TraceAI/#results) and in
-`docs/eval.json`. Do not read any row as real-world accuracy.
+`docs/eval.json`.
 
 ## Misuse safeguards (what the code enforces)
 
@@ -204,7 +224,8 @@ breaking it" is reproducible rather than a claim), and runs the Docker smoke tes
 ## Reproducing the screenshots and results
 
 ```bash
-python -m scripts.evaluate --seeds 5 --setting standard   # and --setting hard
+python -m scripts.evaluate --seeds 5 --setting standard   # also: --setting hard, and
+python -m scripts.evaluate --seeds 5 --setting photo-rate --photo-rates 0.2 0.5 1.0
 python -m scripts.export_demo                             # data for the demo site
 python -m scripts.make_screenshot_data                    # photo-free database copy
 python -m scripts.capture_screenshots                     # needs: pip install playwright
