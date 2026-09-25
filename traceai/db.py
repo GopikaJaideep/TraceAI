@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine,
+    JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine, text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
@@ -163,8 +163,23 @@ def engine():
     return _engine
 
 
+# Arbitrary constant shared by every TraceAI process; only its equality matters.
+_SCHEMA_LOCK_ID = 7_264_190_311
+
+
 def init_db() -> None:
-    Base.metadata.create_all(engine())
+    """Create any missing tables. Safe to call from several processes starting at once.
+
+    The public and officer APIs both call this at startup, and in Docker Compose they start together. On
+    PostgreSQL two concurrent CREATE TABLE statements race and one crashes with a duplicate `pg_type` key,
+    so schema creation takes a transaction-scoped advisory lock: the second process waits, then finds the
+    tables already there.
+    """
+    eng = engine()
+    with eng.begin() as conn:
+        if eng.dialect.name == "postgresql":
+            conn.execute(text("SELECT pg_advisory_xact_lock(:id)"), {"id": _SCHEMA_LOCK_ID})
+        Base.metadata.create_all(conn)
 
 
 def session():
