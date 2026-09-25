@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import random
 from datetime import datetime, timedelta
+from functools import lru_cache
 
 import cv2
 import numpy as np
@@ -44,6 +45,7 @@ def _fmt_time(dt: datetime) -> str:
     return f"{hour}{suffix}" if dt.minute == 0 else f"{hour}:{dt.minute:02d}{suffix}"
 
 
+@lru_cache(maxsize=1)  # the float32 originals are ~5 GB; load once per process and keep only the uint8 copy
 def _load_lfw(min_faces: int = 4):
     from sklearn.datasets import fetch_lfw_people
 
@@ -75,13 +77,24 @@ def _augment(img: np.ndarray, rng: random.Random) -> np.ndarray:
     return cv2.resize(small, (img.shape[1], img.shape[0]))
 
 
-def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None, hard: bool = False):
+def build_dataset(
+    n_persons: int = 6, seed: int = 7, now: datetime | None = None, hard: bool = False,
+    photo_rate: float | None = None,
+):
     """Return (profiles, sighting_specs). Profiles are *unsaved* MissingPerson objects.
 
     With `hard=True` the decoys read exactly like true sightings (same outfit, same area, confident
     wording) and differ only by whose face is in the photo, so text alone cannot separate them. That is
     the situation where the face signal has to earn its place.
+
+    `photo_rate` (which implies `hard`) removes a bias in plain hard mode, where every decoy carries a
+    photo but one true sighting per person does not. Every true sighting is first given a photo, then each
+    photo of every sighting, true or decoy, is kept with probability `photo_rate`, independently of the
+    label. It uses its own random generator, so the rest of the dataset is identical to plain hard mode.
     """
+    if photo_rate is not None:
+        hard = True
+    mask_rng = random.Random(f"{seed}:{photo_rate}") if photo_rate is not None else None
     rng = random.Random(seed)
     now = now or datetime.utcnow()
     images, target, _ = _load_lfw()
@@ -92,6 +105,7 @@ def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None
     cities = ["Melbourne", "Sydney", "Brisbane", "Perth"]
     profiles, specs = [], []
     for idx, ident in enumerate(chosen):
+        first_spec = len(specs)
         city = cities[idx % len(cities)]
         anchors = [p for p in gazetteer.PLACES if p.city == city]
         home = rng.choice(anchors)
@@ -123,7 +137,12 @@ def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None
             when = last_seen + timedelta(hours=4 + step * 5)
             text = rng.choice(TRUE_TEMPLATES).format(
                 place=place.name, c0=outfit[0], c1=outfit[1], t=_fmt_time(when))
-            photo = _augment(images[sighting_photos[step % len(sighting_photos)]], rng) if step < 2 else None
+            if step < 2:
+                photo = _augment(images[sighting_photos[step % len(sighting_photos)]], rng)
+            elif mask_rng is not None:  # every identity has at least 4 photos, so index 3 exists
+                photo = _augment(images[photo_idx[3]], mask_rng)
+            else:
+                photo = None
             specs.append({"truth": idx, "text": text, "seen_at": when, "photo": photo, "kind": "true",
                           "photo_identity": int(ident)})
         for _ in range(3):  # decoys: wrong outfit, other identity, hedged
@@ -152,6 +171,10 @@ def build_dataset(n_persons: int = 6, seed: int = 7, now: datetime | None = None
         when = last_seen + timedelta(hours=2)
         specs.append({"truth": None, "kind": "impossible", "seen_at": when, "photo": None,
                       "text": f"Definitely saw them at {far.name}, in a {outfit[0]}, around {_fmt_time(when)}."})
+        if mask_rng is not None:  # keep each photo with the same probability whatever the label
+            for s in specs[first_spec:]:
+                if s["photo"] is not None and mask_rng.random() >= photo_rate:
+                    s["photo"] = None
     return profiles, specs
 
 

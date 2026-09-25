@@ -202,18 +202,332 @@
      }
     }
    }
+  },
+  "photo_rate_20": {
+   "cases": 30,
+   "sightings_ranked_per_case": 42,
+   "true_per_case": 3,
+   "metrics": {
+    "random": {
+     "p@3": {
+      "mean": 0.07,
+      "sd": 0.144
+     },
+     "hit@1": {
+      "mean": 0.069,
+      "sd": 0.254
+     },
+     "mrr": {
+      "mean": 0.209,
+      "sd": 0.248
+     },
+     "auroc": {
+      "mean": 0.498,
+      "sd": 0.174
+     }
+    },
+    "proximity": {
+     "p@3": {
+      "mean": 0.389,
+      "sd": 0.174
+     },
+     "hit@1": {
+      "mean": 0.433,
+      "sd": 0.496
+     },
+     "mrr": {
+      "mean": 0.682,
+      "sd": 0.288
+     },
+     "auroc": {
+      "mean": 0.944,
+      "sd": 0.03
+     }
+    },
+    "context": {
+     "p@3": {
+      "mean": 0.489,
+      "sd": 0.223
+     },
+     "hit@1": {
+      "mean": 0.567,
+      "sd": 0.496
+     },
+     "mrr": {
+      "mean": 0.748,
+      "sd": 0.296
+     },
+     "auroc": {
+      "mean": 0.959,
+      "sd": 0.031
+     }
+    },
+    "face": {
+     "p@3": {
+      "mean": 0.222,
+      "sd": 0.179
+     },
+     "hit@1": {
+      "mean": 0.533,
+      "sd": 0.499
+     },
+     "mrr": {
+      "mean": 0.609,
+      "sd": 0.435
+     },
+     "auroc": {
+      "mean": 0.587,
+      "sd": 0.093
+     }
+    },
+    "full": {
+     "p@3": {
+      "mean": 0.622,
+      "sd": 0.223
+     },
+     "hit@1": {
+      "mean": 0.733,
+      "sd": 0.442
+     },
+     "mrr": {
+      "mean": 0.853,
+      "sd": 0.249
+     },
+     "auroc": {
+      "mean": 0.973,
+      "sd": 0.023
+     }
+    }
+   },
+   "photo_share": {
+    "true": 0.178,
+    "decoy": 0.211
+   },
+   "photo_rate": 0.2
+  },
+  "photo_rate_50": {
+   "cases": 30,
+   "sightings_ranked_per_case": 42,
+   "true_per_case": 3,
+   "metrics": {
+    "random": {
+     "p@3": {
+      "mean": 0.07,
+      "sd": 0.144
+     },
+     "hit@1": {
+      "mean": 0.069,
+      "sd": 0.254
+     },
+     "mrr": {
+      "mean": 0.209,
+      "sd": 0.248
+     },
+     "auroc": {
+      "mean": 0.498,
+      "sd": 0.174
+     }
+    },
+    "proximity": {
+     "p@3": {
+      "mean": 0.389,
+      "sd": 0.174
+     },
+     "hit@1": {
+      "mean": 0.433,
+      "sd": 0.496
+     },
+     "mrr": {
+      "mean": 0.682,
+      "sd": 0.288
+     },
+     "auroc": {
+      "mean": 0.944,
+      "sd": 0.03
+     }
+    },
+    "context": {
+     "p@3": {
+      "mean": 0.5,
+      "sd": 0.206
+     },
+     "hit@1": {
+      "mean": 0.5,
+      "sd": 0.5
+     },
+     "mrr": {
+      "mean": 0.725,
+      "sd": 0.281
+     },
+     "auroc": {
+      "mean": 0.961,
+      "sd": 0.026
+     }
+    },
+    "face": {
+     "p@3": {
+      "mean": 0.544,
+      "sd": 0.279
+     },
+     "hit@1": {
+      "mean": 0.9,
+      "sd": 0.3
+     },
+     "mrr": {
+      "mean": 0.906,
+      "sd": 0.282
+     },
+     "auroc": {
+      "mean": 0.763,
+      "sd": 0.136
+     }
+    },
+    "full": {
+     "p@3": {
+      "mean": 0.811,
+      "sd": 0.205
+     },
+     "hit@1": {
+      "mean": 0.933,
+      "sd": 0.249
+     },
+     "mrr": {
+      "mean": 0.967,
+      "sd": 0.125
+     },
+     "auroc": {
+      "mean": 0.988,
+      "sd": 0.016
+     }
+    }
+   },
+   "photo_share": {
+    "true": 0.533,
+    "decoy": 0.489
+   },
+   "photo_rate": 0.5
+  },
+  "photo_rate_100": {
+   "cases": 30,
+   "sightings_ranked_per_case": 42,
+   "true_per_case": 3,
+   "metrics": {
+    "random": {
+     "p@3": {
+      "mean": 0.07,
+      "sd": 0.144
+     },
+     "hit@1": {
+      "mean": 0.069,
+      "sd": 0.254
+     },
+     "mrr": {
+      "mean": 0.209,
+      "sd": 0.248
+     },
+     "auroc": {
+      "mean": 0.498,
+      "sd": 0.174
+     }
+    },
+    "proximity": {
+     "p@3": {
+      "mean": 0.389,
+      "sd": 0.174
+     },
+     "hit@1": {
+      "mean": 0.433,
+      "sd": 0.496
+     },
+     "mrr": {
+      "mean": 0.682,
+      "sd": 0.288
+     },
+     "auroc": {
+      "mean": 0.944,
+      "sd": 0.03
+     }
+    },
+    "context": {
+     "p@3": {
+      "mean": 0.489,
+      "sd": 0.223
+     },
+     "hit@1": {
+      "mean": 0.567,
+      "sd": 0.496
+     },
+     "mrr": {
+      "mean": 0.75,
+      "sd": 0.293
+     },
+     "auroc": {
+      "mean": 0.96,
+      "sd": 0.029
+     }
+    },
+    "face": {
+     "p@3": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 1.0,
+      "sd": 0.0
+     }
+    },
+    "full": {
+     "p@3": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "hit@1": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "mrr": {
+      "mean": 1.0,
+      "sd": 0.0
+     },
+     "auroc": {
+      "mean": 1.0,
+      "sd": 0.0
+     }
+    }
+   },
+   "photo_share": {
+    "true": 1.0,
+    "decoy": 1.0
+   },
+   "photo_rate": 1.0
   }
+ },
+ "setting_titles": {
+  "photo_rate_20": "Hard setting, 20% of tips carry a photo",
+  "photo_rate_50": "Hard setting, 50% of tips carry a photo",
+  "photo_rate_100": "Hard setting, 100% of tips carry a photo"
  },
  "setting_notes": {
   "standard": "Decoys have a different outfit or hedged wording, so text alone can separate them.",
-  "hard": "Decoys share the outfit, confident wording, places and times of true sightings; only the face differs."
+  "hard": "Decoys share the outfit, confident wording, places and times of true sightings; only the face differs.",
+  "photo_rate_20": "Look-alike decoys as in the hard setting, but every tip, true or decoy, keeps its photo with probability 20%, independent of its label.",
+  "photo_rate_50": "Look-alike decoys as in the hard setting, but every tip, true or decoy, keeps its photo with probability 50%, independent of its label.",
+  "photo_rate_100": "Look-alike decoys as in the hard setting, but every tip, true or decoy, keeps its photo with probability 100%, independent of its label."
  },
  "caveats": [
   "Synthetic data: the report templates and the extraction rules were written together, so the text side is optimistic, especially in the standard setting.",
   "Faces are frontal LFW photos of public figures; 'other camera' is simulated with brightness, blur and downscaling, not real CCTV.",
   "Only 30 cases per setting (5 seeds x 6 identities): differences of a few points are noise.",
-  "Only 2 of each person's 3 true sightings carry a photo, so face-only ranking cannot exceed precision@3 of about 0.67.",
-  "Every decoy carries a photo but one of each person's three true sightings does not, which favours fusion: mismatched faces push decoys down while the photo-less true sighting is not penalised. Real tips will mostly have no photo.",
+  "Standard and hard settings: only 2 of each person's 3 true sightings carry a photo, so face-only ranking cannot exceed precision@3 of about 0.67.",
+  "Hard setting: every decoy carries a photo but one of each person's three true sightings does not, which favours fusion, because mismatched faces push decoys down while the photo-less true sighting is not penalised. The photo-rate settings remove that bias: whether a tip has a photo no longer depends on its label.",
   "Compare rows with each other; do not read any row as real-world accuracy."
  ]
 }

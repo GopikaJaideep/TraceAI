@@ -183,8 +183,8 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   <div id="evalBox"><p class="meta">Loading results…</p></div>
   <div id="evalReading" class="panel note" style="margin-top:14px">
     <h3>What this shows, and what it doesn't</h3>
-    <p>The standard setting is easy: text alone already scores 0.91, and fusion (0.94) is within the noise, so it can't show what combining signals is for. In the hard setting, where decoys share the outfit, wording, places and times of true sightings, text-only ranking falls to 0.48, which is chance among the six look-alikes, and face-only is capped near 0.67 because a third of true sightings have no photo. Fused ranking scores 0.96.</p>
-    <p style="margin-top:8px"><b>Read 0.96 as an upper bound.</b> It exceeds the face-only cap because of an asymmetry in the benchmark: every decoy carries a photo but one true sighting per person does not, so mismatched faces push decoys down while the photo-less true sighting isn't penalised. Real tips mostly won't have photos. It is also synthetic throughout, with 30 cases per setting. Earlier versions of this benchmark had two flaws that flattered the results; both are fixed, which is why these numbers are lower than the first published ones.</p>
+    <p>The standard setting is easy: text alone scores 0.91 and fusion (0.94) is within the noise. The fair test is the photo-availability table: decoys look like true sightings, so text alone is at chance (about 0.50), and each tip keeps its photo at the stated rate whatever its label. Fused ranking scores <b>0.62 with 20% of tips carrying a photo and 0.81 with 50%</b>, ahead of both text alone and face alone, which is what combining signals is for.</p>
+    <p style="margin-top:8px"><b>Caveats:</b> at 100% photos the face alone is already perfect, because synthetic frontal photos are easy for the face model, so treat that row as a ceiling. At low photo rates the limit is information: a photo-less true sighting with look-alike text has nothing that separates it from a photo-less decoy. The plain hard setting's 0.96 is inflated (every decoy has a photo, one true sighting per person does not), which is why that test was added. Everything is synthetic, with 30 cases per setting, and each earlier fix lowered the numbers.</p>
   </div>
 </section>
 
@@ -284,6 +284,25 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
       t.append(body); wrap.append(t); box.append(wrap);
       box.append(el("p", "meta", S.cases + " cases · " + S.sightings_ranked_per_case + " sightings ranked per case · face model " + E.face_model));
     });
+    // Sensitivity to photo availability: one compact table across the photo-rate settings.
+    const rates = Object.keys(E.settings).filter((k) => k.startsWith("photo_rate_"))
+      .sort((a, b) => E.settings[a].photo_rate - E.settings[b].photo_rate);
+    if (rates.length) {
+      box.append(el("h3", null, "How much does it depend on photos?"),
+        el("p", "meta", "Look-alike decoys as in the hard setting, but every tip, true or decoy, keeps its photo with the probability shown, independent of its label. Precision@3, mean ± spread across cases."));
+      const wrap = el("div", "panel scroll"), t = el("table"), head = el("thead"), hr = el("tr");
+      ["Tips with a photo", "Text only (no face)", "Face only", "All signals fused", "Fused: top-1 correct"].forEach((h, i) => hr.append(el("th", i ? "num" : null, h)));
+      head.append(hr); t.append(head);
+      const body = el("tbody");
+      rates.forEach((k) => {
+        const S = E.settings[k], m = S.metrics, f = (n) => m[n]["p@3"].mean.toFixed(2) + " ± " + m[n]["p@3"].sd.toFixed(2);
+        const tr = el("tr");
+        tr.append(el("td", null, Math.round(S.photo_rate * 100) + "%"), el("td", "num", f("context")), el("td", "num", f("face")),
+          el("td", "num", f("full")), el("td", "num", m.full["hit@1"].mean.toFixed(2)));
+        body.append(tr);
+      });
+      t.append(body); wrap.append(t); box.append(wrap);
+    }
     box.append(el("h3", null, "Caveats"));
     const ul = el("ul"); E.caveats.forEach((c) => ul.append(el("li", null, c))); box.append(ul);
   }
