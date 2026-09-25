@@ -148,13 +148,15 @@ The reasoning, the alternatives I rejected and the risks I could not remove are 
   with database admin rights from rewriting the whole chain.
 - **Accuracy and fairness:** measure face-matching and lead-ranking error rates, including across
   demographic groups, on data that resembles reality.
+- **Model licensing:** the InsightFace pretrained models are for non-commercial research use only, so
+  production use needs different models or permission from their owners (see the licence table below).
 - **Assurance:** independent security testing and an ethics review.
 
 ## Run locally
 
 ```bash
 python -m venv .venv
-.venv/Scripts/pip install -r requirements.txt insightface   # Windows; use .venv/bin on Linux/macOS
+.venv/Scripts/pip install -r requirements.txt   # Windows; use .venv/bin on Linux/macOS
 .venv/Scripts/python -m spacy download en_core_web_sm
 
 # Seed synthetic data (first run downloads LFW, ~230 MB, and the face model). Prints login credentials once.
@@ -216,6 +218,28 @@ python -m scripts.capture_screenshots                     # needs: pip install p
 - Lead scores are heuristic and uncalibrated. Weights are in `traceai/scoring.py`.
 - The Streamlit public form has no honeypot field (the API supports one for custom front ends).
 - No database migrations; no MFA; in-memory rate limits.
+
+## Licences and data terms
+
+TraceAI's own code is under the [MIT licence](LICENSE). It uses third-party models, data and libraries with
+their own terms. This is a summary, not legal advice: check the current terms before reusing anything.
+
+| Component | Terms | What it means here |
+|---|---|---|
+| **InsightFace pretrained models** (`buffalo_l`, `buffalo_sc`) | Non-commercial research use only, per the InsightFace project | Fine for this research prototype. Any commercial or production use needs separate permission from the model's owners. The models are downloaded at runtime, not shipped in this repo. |
+| **LFW face dataset** | A research dataset of photos of public figures; see its own terms | Downloaded through scikit-learn and never committed. It is used only to test matching, and its photos never appear in published screenshots or the demo site. |
+| **OpenStreetMap** data and tiles | ODbL, attribution required | The demo map credits OpenStreetMap contributors. The public tile server is meant for light use, so a real deployment needs its own tile source. |
+| **Python libraries** | Mostly MIT, BSD or Apache-2.0 (FastAPI, SQLAlchemy, Streamlit, PyTorch, spaCy, scikit-learn and others) | `psycopg2` is LGPL. |
+| **Leaflet** (demo site) | BSD-2-Clause | Loaded from a CDN. |
+| **Profiles and reports** | Invented for this project | No real people, cases or reports. |
+
+## Dependencies
+
+Direct dependencies are pinned in `requirements.txt` (runtime) and `requirements-ci.txt` (the lean set CI
+uses) to the versions the tests and evaluation were run with, and the Docker image pins PyTorch too. That
+makes builds repeatable, but transitive dependencies are still resolved by pip, so it is not a full lock
+file (`pip-compile` with hashes would be the next step). Pinned versions also go stale, so they need
+updating from time to time.
 
 ## Data
 
