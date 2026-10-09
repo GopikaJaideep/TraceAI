@@ -489,7 +489,7 @@ footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
     <h2 class="reveal">How I know it works</h2>
     <p class="sub reveal">Checks that can fail, run on every change.</p>
     <div class="tiles">
-      <div class="card tile reveal"><span class="ico"><svg class="i"><use href="#i-flask"/></svg></span><div class="big" data-count="51">51</div><span>tests through the real HTTP layer</span></div>
+      <div class="card tile reveal"><span class="ico"><svg class="i"><use href="#i-flask"/></svg></span><div class="big" data-count="51">51</div><span>automated tests; 32 drive the API end to end</span></div>
       <div class="card tile reveal" style="--d:.08s"><span class="ico"><svg class="i"><use href="#i-shield"/></svg></span><div class="big">10/10</div><span>deliberately broken safeguards caught</span></div>
       <div class="card tile reveal" style="--d:.16s"><span class="ico"><svg class="i"><use href="#i-box"/></svg></span><div class="big" data-count="4">4</div><span>CI jobs, incl. a Docker + PostgreSQL smoke test</span></div>
       <div class="card tile reveal" style="--d:.24s"><span class="ico"><svg class="i"><use href="#i-flag"/></svg></span><div class="big" data-count="3">3</div><span>flaws in my own benchmark, found and disclosed</span></div>
@@ -517,7 +517,7 @@ footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
   const COLOURS = { hi: "#c2410c", mid: "#b45309", lo: "#64748b" };
   const LABELS = { image: "Face match", description: "Description", proximity: "Proximity", recency: "Recency", credibility: "Credibility" };
   const AVATARS = ["#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f"];
-  let DATA, map, layer, current, markers = [];
+  let DATA, map, layer, current, markers = [], defaultBounds, zoomedOut = false;
 
   /* ---------- scroll reveal, counters, progress bar, nav colour ---------- */
   const io = "IntersectionObserver" in window;
@@ -677,7 +677,7 @@ footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
   }
 
   function drawMap() {
-    layer.clearLayers(); markers = [];
+    layer.clearLayers(); markers = []; zoomedOut = false;
     const pts = [[current.lat, current.lng]];
     L.circleMarker([current.lat, current.lng], { radius: 9, color: "#111", weight: 3, fillColor: "#fff", fillOpacity: 1 }).bindTooltip("Last known: " + current.last_place).addTo(layer);
     current.clusters.filter((c) => c.size >= 2).forEach((c) => L.circle([c.lat, c.lng], { radius: 1500, color: "#7c3aed", weight: 1.5, fill: false, dashArray: "4 4" }).addTo(layer));
@@ -690,7 +690,8 @@ footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
       if (l.score >= 0.3) pts.push([l.lat, l.lng]);  // frame the strong leads; a far-off weak one should not zoom the map out
     });
     if (pts.length < 2) current.leads.forEach((l) => { if (l.lat != null) pts.push([l.lat, l.lng]); });
-    map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 14 });
+    defaultBounds = L.latLngBounds(pts).pad(0.25);
+    map.fitBounds(defaultBounds, { maxZoom: 14, animate: false });
     setTimeout(() => map.invalidateSize(), 50);
   }
 
@@ -704,7 +705,16 @@ footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
     if (l.flagged) d.append(el("p", "tag flag", "Flagged: repeat source or duplicate text"));
     d.append(bars(l.components), el("div", "eq", equation(l.components, l.score, l.notes)));
     l.notes.forEach((n) => d.append(el("div", "meta", "· " + n)));
-    if (markers[idx]) markers[idx].openTooltip();
+    const m = markers[idx];
+    if (m) {
+      const ll = m.getLatLng();
+      if (!map.getBounds().contains(ll)) {  // a weak lead can sit outside the default framing: show it with the last-known place
+        map.fitBounds(L.latLngBounds([[current.lat, current.lng], ll]).pad(0.25), { maxZoom: 14 }); zoomedOut = true;
+      } else if (zoomedOut && defaultBounds.contains(ll)) {  // back to a strong lead: restore the default framing
+        map.fitBounds(defaultBounds, { maxZoom: 14 }); zoomedOut = false;
+      }
+      m.openTooltip();
+    }
   }
 })();
 </script>

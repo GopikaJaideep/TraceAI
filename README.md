@@ -213,7 +213,7 @@ round-trip through the database. If you would rather not use Docker, the manual 
 ## Tests and CI
 
 ```bash
-.venv/Scripts/python -m pytest -q tests           # 48 tests, through the real HTTP layer
+.venv/Scripts/python -m pytest -q tests           # 51 tests: 32 drive the API end to end (in-process), 19 call the code directly
 .venv/Scripts/python -m scripts.mutation_check    # breaks 10 safeguards one at a time; the tests must fail each time
 ```
 
