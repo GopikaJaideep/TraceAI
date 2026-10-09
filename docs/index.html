@@ -7,248 +7,504 @@
 <meta name="description" content="Interactive demo of TraceAI, a multi-modal AI research prototype that ranks witness sightings for missing-person investigators. Synthetic data only.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230f766e'/%3E%3Cpath d='M16 6l4 10-4 10-4-10z' fill='white'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script>document.documentElement.classList.add("js")</script>
 <style>
+/* ---------- base tokens (light/dark follow the visitor's system) ---------- */
 :root{
-  --bg:#f7f8f7; --surface:#fff; --ink:#14201d; --muted:#5b6b66; --line:#dfe5e2;
-  --accent:#0f766e; --accent-ink:#fff; --hi:#c2410c; --mid:#b45309; --lo:#64748b;
-  --bar:#0f766e; --bar-bg:#e6ecea; --warn-bg:#fff7e6; --warn-line:#f0d9a8;
-  --radius:12px; --shadow:0 1px 2px rgba(20,32,29,.06),0 4px 14px rgba(20,32,29,.05);
+  color-scheme:light dark;
+  --page:light-dark(#f7f8f7,#0b1210);
+  --ink:light-dark(#14201d,#e8f0ed);
+  --muted:light-dark(#566660,#9fb2ab);
+  --surface:light-dark(#ffffff,#16211e);
+  --shadow-c:light-dark(rgba(20,32,29,.35),rgba(0,0,0,.65));
+  --hi:light-dark(#c2410c,#fb923c);--mid:light-dark(#b45309,#fbbf24);--lo:light-dark(#64748b,#94a3b8);
+  --line:color-mix(in srgb,var(--ink) 14%,transparent);
+  --radius:16px;--cur:#0f766e;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0d1513; --surface:#141e1b; --ink:#e7efec; --muted:#9db0aa; --line:#243530;
-  --accent:#2dd4bf; --accent-ink:#06211d; --hi:#fb923c; --mid:#fbbf24; --lo:#94a3b8;
-  --bar:#2dd4bf; --bar-bg:#22322e; --warn-bg:#2a2412; --warn-line:#4a3f1c;
-  --shadow:none;}}
-:root[data-theme="dark"]{
-  --bg:#0d1513; --surface:#141e1b; --ink:#e7efec; --muted:#9db0aa; --line:#243530;
-  --accent:#2dd4bf; --accent-ink:#06211d; --hi:#fb923c; --mid:#fbbf24; --lo:#94a3b8;
-  --bar:#2dd4bf; --bar-bg:#22322e; --warn-bg:#2a2412; --warn-line:#4a3f1c; --shadow:none;}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-a{color:var(--accent)}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent,#0f766e)}
+:focus-visible{outline:3px solid var(--accent,#0f766e);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-header.nav{position:sticky;top:0;z-index:1000;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.i{width:1.35em;height:1.35em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- one colour band per section ---------- */
+.band{--line:color-mix(in srgb,var(--ink) 14%,transparent);--surface:light-dark(#ffffff,color-mix(in srgb,var(--bg) 84%,#ffffff));background:var(--bg);padding:76px 0;scroll-margin-top:56px;position:relative}
+.t-teal{--bg:light-dark(#e3f3ef,#0e1f1b);--accent:light-dark(#0f766e,#2dd4bf);--accent-ink:light-dark(#fff,#04201b);--soft:light-dark(#c9e8e1,#173a33)}
+.t-violet{--bg:light-dark(#efe9fb,#17132b);--accent:light-dark(#6d28d9,#a78bfa);--accent-ink:light-dark(#fff,#150d33);--soft:light-dark(#ddd2f6,#2a2150)}
+.t-amber{--bg:light-dark(#fff3dc,#241b0c);--accent:light-dark(#b45309,#fbbf24);--accent-ink:light-dark(#fff,#2a1a03);--soft:light-dark(#fde4b0,#43310f)}
+.t-rose{--bg:light-dark(#fdebee,#27121a);--accent:light-dark(#be123c,#fb7185);--accent-ink:light-dark(#fff,#2b0610);--soft:light-dark(#f9ccd5,#45202c)}
+.t-blue{--bg:light-dark(#e6effd,#101a2e);--accent:light-dark(#1d4ed8,#60a5fa);--accent-ink:light-dark(#fff,#071530);--soft:light-dark(#cddff9,#1d2f52)}
+.t-green{--bg:light-dark(#e5f5ea,#0f1f15);--accent:light-dark(#15803d,#4ade80);--accent-ink:light-dark(#fff,#052010);--soft:light-dark(#c8e9d2,#1a3524)}
+.t-cyan{--bg:light-dark(#e2f4f8,#0d1d22);--accent:light-dark(#0e7490,#22d3ee);--accent-ink:light-dark(#fff,#04202a);--soft:light-dark(#c3e6ee,#15363f)}
+.t-navy{--bg:light-dark(#122544,#0a1424);--ink:#eef3ff;--muted:#a9b8d4;--surface:light-dark(#1a3157,#122240);--accent:#fbbf24;--accent-ink:#2a1a03;--soft:light-dark(#24407a,#1c3566);color:var(--ink)}
+.t-fuchsia{--bg:light-dark(#fbebfb,#25122a);--accent:light-dark(#a21caf,#e879f9);--accent-ink:light-dark(#fff,#2a0630);--soft:light-dark(#f2cff4,#411d49)}
+
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.kicker::before{content:"";width:22px;height:3px;border-radius:3px;background:var(--accent)}
+h1{font-size:clamp(34px,5.4vw,56px);line-height:1.04;letter-spacing:-.03em;margin:0 0 16px}
+h2{font-size:clamp(26px,3.4vw,38px);line-height:1.12;letter-spacing:-.02em;margin:0 0 8px}
+.sub{color:var(--muted);max-width:60ch;margin:0 0 30px;font-size:17px}
+.meta{font-size:13.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 14px 30px -18px var(--shadow-c)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 11px;border-radius:999px;background:var(--soft);color:var(--ink);white-space:nowrap}
+.chip.warn{background:light-dark(#fde9b8,#4a3a12);color:light-dark(#6b3d00,#fde9b8)}
+.chip.good{background:color-mix(in srgb,var(--accent) 22%,var(--surface));color:var(--ink)}
+
+/* scroll reveal (only hidden when JS is running) */
+html.js .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;transition-delay:var(--d,0s)}
+html.js .reveal.in{opacity:1;transform:none}
+
+/* ---------- nav + progress ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--cur);z-index:1200;transition:background .5s}
+header.nav{position:sticky;top:0;z-index:1100;background:color-mix(in srgb,var(--page) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 header.nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
-.brand{font-weight:700;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
-.brand i{width:22px;height:22px;border-radius:50%;background:var(--accent);display:inline-block}
-.nav nav{display:flex;gap:18px;margin-left:auto;font-size:14px}
-.nav nav a{color:var(--muted);text-decoration:none}.nav nav a:hover{color:var(--ink)}
-@media (max-width:640px){.nav nav a:not(.gh){display:none}}
-.hero{padding:64px 0 36px}
-.badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.badge{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
-.badge.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--ink)}
-h1{font-size:clamp(32px,5.2vw,52px);line-height:1.08;letter-spacing:-.025em;margin:0 0 16px;max-width:18ch}
-.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:62ch;margin:0 0 26px}
-.cta{display:flex;flex-wrap:wrap;gap:12px}
-.btn{display:inline-block;padding:11px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.brand{font-weight:800;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:9px}
+.brand i{width:22px;height:22px;border-radius:50%;background:var(--cur);display:inline-block;transition:background .5s}
+.nav nav{display:flex;gap:4px;margin-left:auto;font-size:14px}
+.nav nav a{color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:999px}
+.nav nav a:hover{color:var(--ink)}
+.nav nav a[aria-current]{color:var(--ink);background:color-mix(in srgb,var(--cur) 18%,transparent)}
+@media (max-width:760px){.nav nav a:not(.gh){display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:60px 0 56px}
+.hero .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+@media (max-width:860px){.hero .grid{grid-template-columns:1fr}}
+.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:44ch;margin:0 0 24px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.btn{display:inline-block;padding:12px 20px;border-radius:12px;font-weight:700;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--surface);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 20px -12px var(--shadow-c)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:34px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.art{width:100%;height:auto;display:block;border-radius:20px;box-shadow:0 24px 50px -26px var(--shadow-c)}
+.art-bg{fill:color-mix(in srgb,var(--surface) 90%,var(--accent))}
+.art .streets{fill:none;stroke:color-mix(in srgb,var(--ink) 12%,transparent);stroke-width:2}
+.art .river{fill:none;stroke:var(--soft);stroke-width:18;stroke-linecap:round}
+.art .corridor{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:7 7;animation:dash 1.1s linear infinite}
+.art .dot{fill:var(--c)}
+.art .ping{fill:var(--c);transform-box:fill-box;transform-origin:center;animation:ping 2.8s ease-out infinite;animation-delay:var(--d,0s)}
+.art .badge-bg{fill:var(--surface);stroke:var(--line)}
+.art text{font:700 11px system-ui,sans-serif;fill:var(--ink)}
+.art .last{fill:var(--surface);stroke:var(--ink);stroke-width:3}
+.art-note{text-align:center;margin-top:8px}
+@keyframes dash{to{stroke-dashoffset:-14}}
+@keyframes ping{0%{transform:scale(.5);opacity:.6}80%,100%{transform:scale(2.7);opacity:0}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px}
 @media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
-.stat b{display:block;font-size:26px;letter-spacing:-.02em}.stat span{font-size:13px;color:var(--muted)}
-section{padding:44px 0}
-h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;margin:0 0 8px}
-.sub{color:var(--muted);max-width:66ch;margin:0 0 24px}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat{padding:16px 18px}
+.stat b{display:block;font-size:34px;line-height:1.1;letter-spacing:-.03em;color:var(--accent)}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* ---------- animated flow (tip to ranked lead) ---------- */
+.flow{display:flex;align-items:stretch;margin-top:6px}
+.node{flex:1 1 0;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 10px;text-align:center;display:grid;gap:6px;justify-items:center;animation:glow 5s ease-in-out infinite;animation-delay:calc(var(--i)*1s)}
+.node .ico{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:var(--soft);color:var(--accent)}
+.node .ico .i{width:26px;height:26px}
+.node b{font-size:15.5px}
+.node small{color:var(--muted);font-size:12.5px;line-height:1.3}
+.link{flex:0 0 clamp(26px,5.5vw,64px);position:relative;align-self:center;height:4px;border-radius:4px;background:var(--soft)}
+.link i,.trk i{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent);opacity:0}
+.link i{left:0;top:50%;animation:runx 5s linear infinite;animation-delay:calc(var(--i)*1s)}
+@keyframes runx{0%{left:0;opacity:0}3%{opacity:1}20%{left:100%;opacity:1}23%{opacity:0}100%{left:100%;opacity:0}}
+@keyframes runy{0%{top:0;opacity:0}3%{opacity:1}20%{top:100%;opacity:1}23%{opacity:0}100%{top:100%;opacity:0}}
+@keyframes glow{0%,100%{border-color:var(--line);box-shadow:0 0 0 0 transparent}4%{border-color:var(--accent);box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 22%,transparent)}22%{border-color:var(--line);box-shadow:0 0 0 0 transparent}}
+.flow-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+@media (max-width:760px){
+  .flow{flex-direction:column}
+  .node{grid-template-columns:50px 1fr;text-align:left;justify-items:start;align-items:center;column-gap:14px;padding:14px}
+  .node .ico{grid-row:span 2}
+  .link{flex:none;width:4px;height:30px}
+  .link i{left:50%;top:0;animation-name:runy}
+}
+
+/* ---------- demo ---------- */
 .demo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
 @media (max-width:900px){.demo{grid-template-columns:1fr}}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--line)}
-select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+select{font:inherit;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--page);color:var(--ink)}
 .avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;flex:none}
-.meta{font-size:13.5px;color:var(--muted)}
-#map{height:460px;border-radius:0 0 var(--radius) var(--radius)}
-@media (max-width:900px){#map{height:340px}}
-.corridor{margin:0 14px 12px;padding:8px 12px;border-radius:8px;background:var(--bar-bg);font-size:14px}
-.leads{max-height:560px;overflow:auto;padding:6px}
-.lead-item{display:flex;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid transparent;border-radius:10px;background:none;color:inherit;font:inherit;cursor:pointer}
-.lead-item:hover{background:var(--bg)}
-.lead-item[aria-pressed="true"]{border-color:var(--accent);background:var(--bg)}
+.demo>.card:first-child{display:flex;flex-direction:column}
+#map{flex:1;min-height:440px;border-radius:0 0 var(--radius) var(--radius)}
+@media (max-width:900px){#map{min-height:340px}}
+.corridor-bar{margin:0 14px 12px;padding:8px 12px;border-radius:10px;background:var(--soft);font-size:14px}
+.leads{max-height:300px;overflow:auto;padding:6px}
+.lead-item{display:flex;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid transparent;border-radius:12px;background:none;color:inherit;font:inherit;cursor:pointer;transition:background .2s}
+.lead-item:hover{background:var(--soft)}
+.lead-item[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
 .pill{flex:none;min-width:48px;height:28px;border-radius:999px;color:#fff;font-weight:700;font-size:13.5px;display:grid;place-items:center;padding:0 8px}
 .pill.hi{background:var(--hi)}.pill.mid{background:var(--mid)}.pill.lo{background:var(--lo)}
 .lead-item .t{font-size:14px;line-height:1.4}.lead-item .p{font-size:12.5px;color:var(--muted)}
 .detail{padding:14px 16px;border-top:1px solid var(--line)}
 .detail h3{margin:0 0 6px;font-size:15px}
-.quote{font-size:14.5px;border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:6px 0 12px;color:var(--ink)}
-.bars{display:grid;gap:7px;margin:8px 0}
-.bar{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;font-size:13px}
-.bar .track{height:9px;border-radius:9px;background:var(--bar-bg);overflow:hidden}
-.bar .fill{height:100%;background:var(--bar);border-radius:9px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.dot.hi{background:var(--hi)}.dot.mid{background:var(--mid)}.dot.lo{background:var(--lo)}.dot.flag{border:3px solid var(--lo);background:transparent}
+
+/* ---------- bars, rings, quotes (used by the demo and scoring cards) ---------- */
+.quote{font-size:14.5px;border-left:3px solid var(--accent);padding:2px 0 2px 10px;margin:6px 0 12px}
+.bars{display:grid;gap:6px;margin:8px 0}
+.bar{display:grid;grid-template-columns:92px 1fr 40px;gap:8px;align-items:center;font-size:12.5px}
+.bar .track{height:8px;border-radius:8px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:8px;animation:grow .9s cubic-bezier(.2,.7,.2,1) both}
 .bar .na{grid-column:2/4;color:var(--muted);font-style:italic}
-.bar span.w{color:var(--muted);font-size:11.5px}
-.eq{font-size:13.5px;background:var(--bar-bg);border-radius:8px;padding:8px 10px;margin-top:8px}
-.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bar-bg);margin:0 4px 4px 0}
-.tag.flag{background:var(--warn-bg);border:1px solid var(--warn-line)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
-.card{padding:16px}
-.card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
-.card h3{margin:0;font-size:16px;line-height:1.3}
-.card .why{font-size:13.5px;color:var(--muted);margin:10px 0 0}
-.chips{margin:6px 0 4px}
-.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 28px}
-.step{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);font-size:14px}
-.step b{display:block;margin-bottom:4px}.step span{color:var(--muted);font-size:13px}
-.zones{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){.zones{grid-template-columns:1fr}}
-.zone{padding:18px}.zone h3{margin:0 0 4px}.zone ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:14.5px}
-.zone.officer{border-color:var(--accent)}
-table{width:100%;border-collapse:collapse;font-size:14.5px}
-th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-tr:last-child td{border-bottom:0}
-.scroll{overflow-x:auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){.grid2{grid-template-columns:1fr}}
-.note{padding:18px}.note h3{margin:0 0 6px;font-size:16px}.note p{margin:0;color:var(--muted);font-size:14.5px}
-.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-.shot{margin:0}.shot img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
-.shot figcaption{font-size:13.5px;color:var(--muted);margin-top:8px}
-.results h3{margin:22px 0 4px;font-size:17px}.results table{background:var(--surface)}
-.results td.num,.results th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.results tr.full td{font-weight:700}
-.results ul{color:var(--muted);font-size:14px;padding-left:20px}
-footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);font-size:13.5px}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.sr{position:absolute;left:-9999px}
+@keyframes grow{from{width:0}}
+.eq{font-size:13px;background:var(--soft);border-radius:10px;padding:8px 10px;margin-top:8px}
+.tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--soft);margin:0 4px 4px 0}
+.tag.flag{background:light-dark(#fde9b8,#4a3a12)}
+.ring{width:56px;height:56px;flex:none}
+.ring .rt{fill:none;stroke:color-mix(in srgb,var(--ink) 11%,transparent);stroke-width:4.5}
+.ring .arc{fill:none;stroke-width:4.5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;stroke-dasharray:var(--len) 113.1;animation:arc 1.1s cubic-bezier(.2,.7,.2,1) both}
+.ring text{font:800 12px system-ui,sans-serif;fill:var(--ink);text-anchor:middle}
+.ring.hi .arc{stroke:var(--hi)}.ring.mid .arc{stroke:var(--mid)}.ring.lo .arc{stroke:var(--lo)}
+@keyframes arc{from{stroke-dasharray:0 113.1}}
+
+/* ---------- scoring ---------- */
+.wbar{display:flex;height:16px;border-radius:10px;overflow:hidden;gap:2px;margin:6px 0 12px}
+.wbar span{display:block;animation:grow .9s ease both}
+.wleg{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px}
+.wleg span{display:inline-flex;align-items:center;gap:6px}
+.wleg i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.wrap-box{padding:20px;margin-bottom:22px}
+.wrap-box .row{margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.scard{padding:16px}
+.scard header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.scard h3{margin:0;font-size:16px;line-height:1.25}
+details.more{margin-top:8px;font-size:13.5px;color:var(--muted)}
+details.more summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.more p{margin:8px 0 0}
+
+/* ---------- results chart ---------- */
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:14px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:background .2s}
+.seg button:hover{background:var(--soft)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rhead{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin:20px 0 6px}
+.take{display:flex;align-items:center;gap:16px}
+.take div{display:grid}
+.take b{font-size:40px;line-height:1;letter-spacing:-.03em}
+.take .fusedv{color:var(--accent)}
+.take span{font-size:12.5px;color:var(--muted)}
+.take .vs{color:var(--muted);font-size:14px}
+.chart{display:grid;gap:12px;margin-top:14px;padding:22px}
+.crow{display:grid;grid-template-columns:210px 1fr;gap:14px;align-items:center}
+@media (max-width:680px){.crow{grid-template-columns:1fr;gap:4px}}
+.clabel{font-size:14px}
+.plot{position:relative;height:28px;margin-right:96px;border-radius:9px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.cbar{height:100%;width:var(--w);border-radius:9px;background:color-mix(in srgb,var(--accent) 40%,var(--surface));animation:grow .8s cubic-bezier(.2,.7,.2,1) both}
+.cval{position:absolute;top:50%;left:calc(var(--w) + 9px);transform:translateY(-50%);font-size:14px;font-weight:700;white-space:nowrap;animation:slide .8s cubic-bezier(.2,.7,.2,1) both}
+.cval small{font-weight:400;color:var(--muted);font-size:12px}
+@keyframes slide{from{left:9px}}
+.crow.full .cbar{background:var(--accent)}
+.crow.full .clabel{font-weight:700}
+.crow.rand .cbar{background:color-mix(in srgb,var(--ink) 28%,var(--surface))}
+details.cav{margin-top:16px;font-size:14px;color:var(--muted)}
+details.cav summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.cav ul{padding-left:20px;margin:10px 0 0}
+
+/* ---------- app screenshots ---------- */
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.shot{margin:0}
+.shot a{display:block;color:inherit;text-decoration:none}
+.frame{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 18px 36px -22px var(--shadow-c);transition:transform .3s,box-shadow .3s}
+.frame::before{content:"";display:block;height:24px;background:radial-gradient(circle at 14px 12px,#ff5f57 4px,transparent 4.5px),radial-gradient(circle at 30px 12px,#febc2e 4px,transparent 4.5px),radial-gradient(circle at 46px 12px,#28c840 4px,transparent 4.5px),var(--soft)}
+.frame img{width:100%;height:auto;display:block}
+.shot a:hover .frame{transform:translateY(-6px);box-shadow:0 26px 44px -22px var(--shadow-c)}
+.shot figcaption{margin-top:12px;font-size:14.5px}
+.shot figcaption b{display:block}
+.shot figcaption span{color:var(--muted);font-size:13.5px}
+
+/* ---------- zones diagram ---------- */
+.zones{display:grid;grid-template-columns:1fr 150px 1fr 150px 1fr;align-items:center}
+.zbox{padding:20px 16px;text-align:center;display:grid;gap:8px;justify-items:center}
+.zbox .ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--soft);color:var(--accent)}
+.zbox .ico .i{width:28px;height:28px}
+.zbox b{font-size:17px}
+.zbox .row{justify-content:center}
+.z-officer{border-color:var(--accent)}
+.lane{display:grid;gap:5px;padding:0 8px;text-align:center}
+.lane small{font-size:12px;color:var(--muted);margin-bottom:8px}
+.trk{position:relative;height:4px;border-radius:4px;background:var(--soft)}
+.trk i{top:50%;left:0;animation:runx2 2.4s linear infinite}
+.trk.back i{background:var(--muted);box-shadow:0 0 0 4px color-mix(in srgb,var(--muted) 25%,transparent);animation-name:runx2r;animation-delay:.9s}
+@keyframes runx2{0%{left:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+@keyframes runx2r{0%{left:100%;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:0;opacity:0}}
+@keyframes runy2{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes runy2r{0%{top:100%;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:0;opacity:0}}
+@media (max-width:860px){
+  .zones{grid-template-columns:1fr}
+  .lane{grid-template-columns:4px auto 4px auto;justify-content:center;align-items:center;column-gap:10px;padding:10px 0;min-height:84px}
+  .lane.single{grid-template-columns:4px auto}
+  .lane small{margin:0;text-align:left}
+  .trk{height:100%;width:4px;align-self:stretch}
+  .trk i{left:50%;top:0;animation-name:runy2}
+  .trk.back i{animation-name:runy2r}
+}
+.zone-note{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+
+/* ---------- safeguards ---------- */
+.guards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.guard{padding:20px;display:grid;gap:10px;align-content:start;transition:transform .25s}
+.guard:hover{transform:translateY(-4px)}
+.guard .ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--soft);color:var(--accent)}
+.guard .ico .i{width:24px;height:24px}
+.guard h3{margin:0;font-size:16.5px;line-height:1.25}
+.guard p{margin:0;color:var(--muted);font-size:14.5px}
+
+/* ---------- engineering ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.tile{padding:22px;display:grid;gap:6px;align-content:start}
+.tile .ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--soft);color:var(--accent);margin-bottom:4px}
+.tile .big{font-size:46px;line-height:1;font-weight:800;letter-spacing:-.03em;color:var(--accent)}
+.tile span{color:var(--muted);font-size:14px}
+.limits{margin-top:26px}
+.limits .row{margin-top:10px}
+
+footer{padding:34px 0 56px;color:var(--muted);font-size:13.5px}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html.js .reveal{opacity:1;transform:none}  /* nothing to animate, so nothing to hide */
+}
 </style>
 </head>
 <body>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M9.5 12h6M9.5 16h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3"/><circle cx="12" cy="10.5" r="2.5"/><path d="M7.5 17c.8-2 2.6-3 4.5-3s3.7 1 4.5 3"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1116 0"/><path d="M12 17l4-6"/><circle cx="12" cy="17" r="1"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.2-6-10a6 6 0 1112 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-funnel" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.6 4.5 4.3"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 001.8 3h10.4a2 2 0 001.8-3l-5-9V3"/><path d="M8 15h8"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2 4 2 4H5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></symbol>
+</svg>
+
 <header class="nav"><div class="wrap">
   <a class="brand" href="#top"><i aria-hidden="true"></i> TraceAI</a>
   <nav aria-label="Sections">
-    <a href="#demo">Demo</a><a href="#scoring">Scoring</a><a href="#results">Results</a><a href="#design">Design</a><a href="#safeguards">Safeguards</a>
+    <a href="#flow">Flow</a><a href="#demo">Demo</a><a href="#scoring">Scoring</a><a href="#results">Results</a><a href="#app">App</a><a href="#safeguards">Safeguards</a>
     <a class="gh" href="https://github.com/GopikaJaideep/TraceAI">GitHub</a>
   </nav>
 </div></header>
 
 <main id="top">
-<div class="wrap">
-<section class="hero">
-  <div class="badges">
-    <span class="badge warn">Research prototype · synthetic data only</span>
-    <span class="badge">Python · FastAPI · InsightFace · spaCy · Streamlit · PostgreSQL · Docker</span>
-  </div>
-  <h1>Ranking witness sightings for missing-person investigators</h1>
-  <p class="lead">TraceAI combines face similarity, natural-language extraction, geospatial clustering and a lead-scoring model, so investigators review the most promising sightings first. Police use it, the public can only report, and misuse is designed against from the start.</p>
-  <div class="cta">
-    <a class="btn primary" href="#demo">Explore the live demo</a>
-    <a class="btn" href="https://github.com/GopikaJaideep/TraceAI">View the code</a>
-  </div>
-  <div class="stats" aria-label="Project facts">
-    <div class="stat"><b>48</b><span>automated tests, each safeguard checked by breaking it</span></div>
-    <div class="stat"><b>5</b><span>fused signals per lead: face, text, place, recency, credibility</span></div>
-    <div class="stat"><b>2</b><span>separate trust zones: public tips, officer console</span></div>
-    <div class="stat"><b>0</b><span>real people, cases or photos, all data is synthetic</span></div>
-  </div>
-</section>
 
-<section id="demo">
-  <h2>Explore a synthetic case</h2>
-  <p class="sub">Every case, sighting and score below was produced by the project's real pipeline on invented data. Pick a case, click a lead on the map or in the list, and see exactly why it ranked where it did.</p>
-  <div class="demo">
-    <div class="panel">
-      <div class="toolbar">
-        <span class="avatar" id="avatar" aria-hidden="true"></span>
-        <label class="sr" for="caseSel">Case</label>
-        <select id="caseSel"></select>
-        <span class="meta" id="caseMeta"></span>
+<section class="band hero t-teal" id="hero" style="padding-top:60px">
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <p class="kicker">Research prototype · synthetic data</p>
+        <h1>Find the sightings worth checking first</h1>
+        <p class="lead">Face, text, place and time fused into one explainable score. Police review the leads. The public can only report.</p>
+        <div class="cta">
+          <a class="btn primary" href="#demo">Explore the demo</a>
+          <a class="btn" href="https://github.com/GopikaJaideep/TraceAI">View the code</a>
+        </div>
+        <div class="row"><span class="chip">FastAPI</span><span class="chip">InsightFace</span><span class="chip">spaCy</span><span class="chip">PostgreSQL</span><span class="chip">Docker</span></div>
       </div>
-      <div class="corridor" id="corridor" hidden></div>
-      <div id="map" role="application" aria-label="Map of the case and its sightings"></div>
+      <figure style="margin:0">
+        <svg class="art" viewBox="0 0 380 300" role="img" aria-label="Illustration: sightings on a map, joined by an animated movement corridor, with score badges">
+          <rect class="art-bg" width="380" height="300" rx="20"/>
+          <path class="streets" d="M0 70L380 48M0 150L380 168M0 220L380 200M86 0L104 300M190 0L176 300M284 0L302 300"/>
+          <path class="river" d="M-10 252C90 214 170 276 390 226"/>
+          <path class="corridor" d="M68 196L128 158L196 122L262 96"/>
+          <g style="--c:var(--lo)"><circle class="dot" cx="152" cy="228" r="5"/><circle class="dot" cx="240" cy="176" r="4"/><circle class="dot" cx="318" cy="150" r="5"/><circle class="dot" cx="96" cy="108" r="4"/><circle class="dot" cx="330" cy="62" r="4"/></g>
+          <g style="--c:var(--hi)">
+            <circle class="ping" cx="128" cy="158" r="12" style="--d:0s"/><circle class="dot" cx="128" cy="158" r="12"/>
+            <circle class="ping" cx="196" cy="122" r="15" style="--d:.9s"/><circle class="dot" cx="196" cy="122" r="15"/>
+            <circle class="ping" cx="262" cy="96" r="11" style="--d:1.8s"/><circle class="dot" cx="262" cy="96" r="11"/>
+          </g>
+          <circle class="last" cx="68" cy="196" r="9"/>
+          <rect class="badge-bg" x="150" y="78" width="44" height="22" rx="11"/><text x="172" y="93" text-anchor="middle">0.91</text>
+          <rect class="badge-bg" x="94" y="124" width="44" height="22" rx="11"/><text x="116" y="139" text-anchor="middle">0.82</text>
+          <rect class="badge-bg" x="248" y="58" width="44" height="22" rx="11"/><text x="270" y="73" text-anchor="middle">0.77</text>
+          <text x="68" y="222" text-anchor="middle" style="font-size:10px">last seen</text>
+        </svg>
+        <figcaption class="meta art-note">Illustration: synthetic sightings, scores and corridor</figcaption>
+      </figure>
     </div>
-    <div class="panel">
-      <div class="toolbar"><b>Prioritised leads</b><span class="meta" id="leadCount"></span></div>
-      <div class="leads" id="leads"></div>
-      <div class="detail" id="detail" aria-live="polite"></div>
+    <div class="stats" aria-label="Project facts">
+      <div class="card stat reveal"><b data-count="51">51</b><span>automated tests</span></div>
+      <div class="card stat reveal" style="--d:.08s"><b data-count="5">5</b><span>signals fused per lead</span></div>
+      <div class="card stat reveal" style="--d:.16s"><b data-count="2">2</b><span>separate trust zones</span></div>
+      <div class="card stat reveal" style="--d:.24s"><b data-count="0">0</b><span>real people or photos</span></div>
     </div>
   </div>
-  <p class="meta" style="margin-top:10px">Marker colour and size show the score (orange is high, grey is low). A grey ring means the report was flagged for reviewer scepticism. Faces are not shown: the project's test photos are of real people, so the demo shows only the match scores.</p>
 </section>
 
-<section id="scoring">
-  <h2>Why did it score that?</h2>
-  <p class="sub">Eight reports about the same person (last seen at Flinders Street Station at midday, grey hoodie), run through the real scoring code. Watch the score move as one thing changes.</p>
-  <div class="cards" id="cards"></div>
-  <div class="panel note" style="margin-top:14px">
-    <h3>How a lead score is built</h3>
-    <p id="formula"></p>
+<section class="band t-violet" id="flow">
+  <div class="wrap">
+    <p class="kicker reveal">The flow</p>
+    <h2 class="reveal">From a tip to a ranked lead</h2>
+    <p class="sub reveal">Every tip takes the same path. Nothing acts on its own.</p>
+    <div class="flow" role="img" aria-label="Pipeline: tip in, understand, compare, score, rank and map. Animated dots show a tip travelling through.">
+      <div class="node" style="--i:0"><span class="ico"><svg class="i"><use href="#i-doc"/></svg></span><b>Tip in</b><small>text + photo</small></div>
+      <div class="link" style="--i:0"><i></i></div>
+      <div class="node" style="--i:1"><span class="ico"><svg class="i"><use href="#i-search"/></svg></span><b>Understand</b><small>place · clothing · time</small></div>
+      <div class="link" style="--i:1"><i></i></div>
+      <div class="node" style="--i:2"><span class="ico"><svg class="i"><use href="#i-scan"/></svg></span><b>Compare</b><small>face · description</small></div>
+      <div class="link" style="--i:2"><i></i></div>
+      <div class="node" style="--i:3"><span class="ico"><svg class="i"><use href="#i-gauge"/></svg></span><b>Score</b><small>5 signals fused</small></div>
+      <div class="link" style="--i:3"><i></i></div>
+      <div class="node" style="--i:4"><span class="ico"><svg class="i"><use href="#i-pin"/></svg></span><b>Rank &amp; map</b><small>clusters · corridor</small></div>
+    </div>
+    <div class="flow-tags reveal">
+      <span class="chip good"><svg class="i"><use href="#i-shield"/></svg>Photos stripped of GPS</span>
+      <span class="chip good"><svg class="i"><use href="#i-flag"/></svg>Hedged reports score lower</span>
+      <span class="chip good"><svg class="i"><use href="#i-clock"/></svg>Impossible journeys score 0</span>
+      <span class="chip good"><svg class="i"><use href="#i-check"/></svg>A person confirms every lead</span>
+    </div>
   </div>
 </section>
 
-<section id="results" class="results">
-  <h2>Does it rank the right sightings first?</h2>
-  <p class="sub">A small reproducible evaluation on synthetic data (<code>python -m scripts.evaluate</code>). Each case ranks 42 sightings, only 3 of which are true, so random ordering gets precision@3 of about 0.07. Two settings are shown because the first turned out to be too easy.</p>
-  <div id="evalBox"><p class="meta">Loading results…</p></div>
-  <div id="evalReading" class="panel note" style="margin-top:14px">
-    <h3>What this shows, and what it doesn't</h3>
-    <p>The standard setting is easy: text alone scores 0.91 and fusion (0.94) is within the noise. The fair test is the photo-availability table: decoys look like true sightings, so text alone is at chance (about 0.50), and each tip keeps its photo at the stated rate whatever its label. Fused ranking scores <b>0.62 with 20% of tips carrying a photo and 0.81 with 50%</b>, ahead of both text alone and face alone, which is what combining signals is for.</p>
-    <p style="margin-top:8px"><b>Caveats:</b> at 100% photos the face alone is already perfect, because synthetic frontal photos are easy for the face model, so treat that row as a ceiling. At low photo rates the limit is information: a photo-less true sighting with look-alike text has nothing that separates it from a photo-less decoy. The plain hard setting's 0.96 is inflated (every decoy has a photo, one true sighting per person does not), which is why that test was added. Everything is synthetic, with 30 cases per setting, and each earlier fix lowered the numbers.</p>
+<section class="band t-amber" id="demo">
+  <div class="wrap">
+    <p class="kicker reveal">Live demo</p>
+    <h2 class="reveal">Explore a synthetic case</h2>
+    <p class="sub reveal">Click a lead to see why it ranked where it did.</p>
+    <div class="demo">
+      <div class="card">
+        <div class="toolbar">
+          <span class="avatar" id="avatar" aria-hidden="true"></span>
+          <label class="sr" for="caseSel">Case</label>
+          <select id="caseSel"></select>
+          <span class="meta" id="caseMeta"></span>
+        </div>
+        <div class="corridor-bar" id="corridor" hidden></div>
+        <div id="map" role="application" aria-label="Map of the case and its sightings"></div>
+      </div>
+      <div class="card">
+        <div class="toolbar"><b>Prioritised leads</b><span class="meta" id="leadCount"></span></div>
+        <div class="leads" id="leads"></div>
+        <div class="detail" id="detail" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="dot hi"></i>high</span><span><i class="dot mid"></i>medium</span><span><i class="dot lo"></i>low</span><span><i class="dot flag"></i>flagged tip</span>
+      <span>No faces shown: the test photos are real people.</span>
+    </div>
   </div>
 </section>
 
-<section id="app">
-  <h2>The real application</h2>
-  <p class="sub">The full system behind the demo: a public portal, an officer console, and an admin view with the audit log. These screenshots use placeholder avatars: the project's test photos are real people, so they are never shown.</p>
-  <div class="shots">
-    <figure class="shot"><img loading="lazy" src="img/public-portal.png" alt="The public portal: police-published appeals with placeholder avatars and a submit-only tip form"><figcaption><b>Public portal.</b> Published appeals and a tip form. A tip returns only a receipt.</figcaption></figure>
-    <figure class="shot"><img loading="lazy" src="img/officer-console.png" alt="The officer console: a case with a map of sightings and a ranked list of leads"><figcaption><b>Officer console.</b> Ranked leads, a map and the inferred movement corridor for a case the officer holds.</figcaption></figure>
-    <figure class="shot"><img loading="lazy" src="img/admin-audit.png" alt="The admin view: users and a tamper-evident audit log with the chain verified"><figcaption><b>Admin.</b> Users and the hash-chained audit log, which records every read and change.</figcaption></figure>
+<section class="band t-rose" id="scoring">
+  <div class="wrap">
+    <p class="kicker reveal">Scoring</p>
+    <h2 class="reveal">Change one thing, watch the score move</h2>
+    <p class="sub reveal">Eight reports about the same person, scored by the real code.</p>
+    <div class="card wrap-box reveal">
+      <b>How a score is built</b>
+      <div class="wbar" id="wbar" aria-hidden="true"></div>
+      <div class="wleg" id="wleg"></div>
+      <div class="row">
+        <span class="chip good">× identity factor</span>
+        <span class="chip warn">impossible journey → 0</span>
+        <span class="chip warn">before last seen → 0</span>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
   </div>
 </section>
 
-<section id="design">
-  <h2>How it works</h2>
-  <p class="sub">A modular pipeline turns a report and an optional photo into ranked, explainable leads.</p>
-  <div class="flow">
-    <div class="step"><b>1 · Ingest</b><span>Free-text report and optional photo. Photos are verified, re-encoded and stripped of GPS metadata.</span></div>
-    <div class="step"><b>2 · Understand</b><span>Rules and spaCy pull out place, clothing and time from the text. Hedging lowers credibility.</span></div>
-    <div class="step"><b>3 · Compare</b><span>ArcFace embeddings for face similarity, semantic similarity for descriptions.</span></div>
-    <div class="step"><b>4 · Score</b><span>Five signals fused. Impossible journeys and out-of-order timelines score zero.</span></div>
-    <div class="step"><b>5 · Map</b><span>DBSCAN clusters strong sightings and infers a movement corridor.</span></div>
-  </div>
-  <h2 style="font-size:22px">Two trust zones</h2>
-  <p class="sub">The public and the police never share a process. The public app does not contain the officer routes at all.</p>
-  <div class="zones">
-    <div class="panel zone"><h3>Public zone</h3><span class="meta">Anyone</span>
-      <ul><li>Read police-published appeals (city-level location only)</li><li>Submit a tip, with rate limits and a consent notice (the API also supports a honeypot field for custom front ends)</li><li>Receives only a random receipt, never a score, match or case</li></ul></div>
-    <div class="panel zone officer"><h3>Officer zone</h3><span class="meta">Verified police and partner-agency staff</span>
-      <ul><li>Login, lockout and per-case need-to-know access</li><li>Ranked leads with a per-signal breakdown, on a map</li><li>Every read and change in a tamper-evident audit log</li></ul></div>
+<section class="band t-blue" id="results">
+  <div class="wrap">
+    <p class="kicker reveal">Results</p>
+    <h2 class="reveal">Does fusion actually help?</h2>
+    <p class="sub reveal">Precision@3: true sightings among the top 3 (random scores 0.07). Synthetic benchmark, 30 cases per setting.</p>
+    <div class="seg" id="seg" role="group" aria-label="Benchmark setting"></div>
+    <div class="rhead">
+      <div class="take" aria-live="polite"><div><b class="fusedv" id="tkFused">–</b><span>fused</span></div><span class="vs">vs</span><div><b id="tkBest">–</b><span id="tkBestLbl">best single signal</span></div></div>
+      <span class="chip" id="rnote"></span>
+    </div>
+    <div class="card chart" id="chart" aria-live="polite"><p class="meta">Loading results…</p></div>
+    <p class="meta" style="margin-top:10px">± is the spread across cases. Compare bars with each other, not with the real world.</p>
+    <details class="cav"><summary>Caveats and how to read this</summary><ul id="cavList"></ul></details>
   </div>
 </section>
 
-<section id="safeguards">
-  <h2>Designed against misuse</h2>
-  <p class="sub">A tool like this can be abused, so the risks are part of the design and each control has a test.</p>
-  <div class="panel scroll"><table>
-    <thead><tr><th>Risk</th><th>Control</th></tr></thead>
-    <tbody>
-      <tr><td><b>Stalking someone who fled an abuser</b>, via a "missing" report</td><td>Cases open only from a police reference plus a family-violence screening attestation. The public never searches, sees matches or sees exact locations.</td></tr>
-      <tr><td><b>Probing the tip form</b> to locate someone</td><td>A tip returns only a receipt. Tipsters are never told whether anything matched.</td></tr>
-      <tr><td><b>Fake or malicious tips</b></td><td>Rate limits, consent and false-report notice, a honeypot field (enforced by the API; the bundled Streamlit form does not include it), and flagging of repeat sources and duplicate text. Tips only join a review queue, so they never trigger action.</td></tr>
-      <tr><td><b>Insider snooping</b></td><td>Per-case need-to-know (even admins are blocked), hash-chained audit log, and reading the log is itself logged.</td></tr>
-      <tr><td><b>Face-matching abuse</b></td><td>Off unless the officer attests the photo was lawfully obtained. Results are similarity scores for human review, never names.</td></tr>
-      <tr><td><b>Keeping data forever</b></td><td>Closing a case deletes its photo, face embedding and leads. Public tips expire after 90 days.</td></tr>
-    </tbody></table></div>
-  <p class="meta" style="margin-top:12px">Not a substitute for legal review, privacy impact assessment, bias testing or a security audit, which the repository lists as required before any real use.</p>
-</section>
-
-<section>
-  <h2>Engineering notes</h2>
-  <div class="grid2">
-    <div class="panel note"><h3>Tests that actually bite</h3><p>The access-control suite runs through the real HTTP layer. I broke each safeguard on purpose to confirm a test fails, and that exposed one weak test, now fixed.</p></div>
-    <div class="panel note"><h3>Bugs found and fixed</h3><p>Ranking evaluation caught synthetic faces coming out black (a float-to-uint8 scaling bug) and wrong-person text reports outranking real matches. An automated review found four more, all fixed with regression tests.</p></div>
-    <div class="panel note"><h3>Honest about limits</h3><p>Scores are heuristic and tuned on synthetic data. The place list is about 50 landmarks, not full OpenStreetMap. The README states these, plus what is required before real use.</p></div>
-    <div class="panel note"><h3>Stack</h3><p>FastAPI, SQLAlchemy (SQLite or PostgreSQL), InsightFace/ArcFace, spaCy, sentence-transformers, scikit-learn DBSCAN, Streamlit, Docker Compose.</p></div>
+<section class="band t-green" id="app">
+  <div class="wrap">
+    <p class="kicker reveal">The app</p>
+    <h2 class="reveal">The real system</h2>
+    <p class="sub reveal">Placeholder avatars only. Click a screenshot to enlarge.</p>
+    <div class="shots">
+      <figure class="shot reveal"><a href="img/public-portal.png" target="_blank" rel="noopener"><div class="frame"><img loading="lazy" src="img/public-portal.png" alt="The public portal: police-published appeals with placeholder avatars and a submit-only tip form"></div></a><figcaption><b>Public portal</b><span>Appeals and a tip form</span></figcaption></figure>
+      <figure class="shot reveal" style="--d:.1s"><a href="img/officer-console.png" target="_blank" rel="noopener"><div class="frame"><img loading="lazy" src="img/officer-console.png" alt="The officer console: a case with a map of sightings and a ranked list of leads"></div></a><figcaption><b>Officer console</b><span>Ranked leads on a map</span></figcaption></figure>
+      <figure class="shot reveal" style="--d:.2s"><a href="img/admin-audit.png" target="_blank" rel="noopener"><div class="frame"><img loading="lazy" src="img/admin-audit.png" alt="The admin view: users and a tamper-evident audit log with the chain verified"></div></a><figcaption><b>Admin</b><span>Hash-chained audit log</span></figcaption></figure>
+    </div>
   </div>
 </section>
-</div>
+
+<section class="band t-cyan" id="design">
+  <div class="wrap">
+    <p class="kicker reveal">Architecture</p>
+    <h2 class="reveal">Two zones that never share a process</h2>
+    <p class="sub reveal">The public app has no officer routes at all.</p>
+    <div class="zones" role="img" aria-label="Diagram: the public zone sends tips to the scoring pipeline and gets only a receipt back; the pipeline sends ranked leads to the officer console.">
+      <div class="card zbox reveal"><span class="ico"><svg class="i"><use href="#i-users"/></svg></span><b>Public</b><span class="meta">Anyone</span><div class="row"><span class="chip">Read appeals</span><span class="chip">Send a tip</span></div></div>
+      <div class="lane"><div class="trk"><i></i></div><small>tip in</small><div class="trk back"><i></i></div><small>receipt only</small></div>
+      <div class="card zbox reveal" style="--d:.1s"><span class="ico"><svg class="i"><use href="#i-gauge"/></svg></span><b>Scoring pipeline</b><span class="meta">Never exposed</span><div class="row"><span class="chip">Understand</span><span class="chip">Compare</span><span class="chip">Score</span></div></div>
+      <div class="lane single"><div class="trk"><i></i></div><small>ranked leads</small></div>
+      <div class="card zbox z-officer reveal" style="--d:.2s"><span class="ico"><svg class="i"><use href="#i-shield"/></svg></span><b>Officer console</b><span class="meta">Verified staff</span><div class="row"><span class="chip">Login</span><span class="chip">Case access</span><span class="chip">Audit log</span></div></div>
+    </div>
+    <div class="zone-note reveal"><span class="chip good"><svg class="i"><use href="#i-lock"/></svg>No scores or matches ever go back to the public</span></div>
+  </div>
+</section>
+
+<section class="band t-navy" id="safeguards">
+  <div class="wrap">
+    <p class="kicker reveal">Safeguards</p>
+    <h2 class="reveal">Designed against misuse</h2>
+    <p class="sub reveal">Each control has an automated test.</p>
+    <div class="guards">
+      <article class="card guard reveal"><span class="ico"><svg class="i"><use href="#i-shield"/></svg></span><h3>Stalking via a “missing” report</h3><p>Cases open only with a police reference and a family-violence check.</p></article>
+      <article class="card guard reveal" style="--d:.06s"><span class="ico"><svg class="i"><use href="#i-receipt"/></svg></span><h3>Probing the tip form</h3><p>A tip returns a receipt, never a match.</p></article>
+      <article class="card guard reveal" style="--d:.12s"><span class="ico"><svg class="i"><use href="#i-funnel"/></svg></span><h3>Fake or malicious tips</h3><p>Rate limits and flags. Tips only join a review queue.</p></article>
+      <article class="card guard reveal" style="--d:.18s"><span class="ico"><svg class="i"><use href="#i-lock"/></svg></span><h3>Insider snooping</h3><p>Per-case access and a tamper-evident audit log.</p></article>
+      <article class="card guard reveal" style="--d:.24s"><span class="ico"><svg class="i"><use href="#i-scan"/></svg></span><h3>Face-matching abuse</h3><p>Off unless the photo is attested as lawfully obtained.</p></article>
+      <article class="card guard reveal" style="--d:.30s"><span class="ico"><svg class="i"><use href="#i-clock"/></svg></span><h3>Keeping data forever</h3><p>Closing a case deletes its photo, face data and leads.</p></article>
+    </div>
+    <p class="meta" style="margin-top:18px">Not a substitute for legal review, a privacy assessment, bias testing or a security audit.</p>
+  </div>
+</section>
+
+<section class="band t-fuchsia" id="engineering">
+  <div class="wrap">
+    <p class="kicker reveal">Engineering</p>
+    <h2 class="reveal">How I know it works</h2>
+    <p class="sub reveal">Checks that can fail, run on every change.</p>
+    <div class="tiles">
+      <div class="card tile reveal"><span class="ico"><svg class="i"><use href="#i-flask"/></svg></span><div class="big" data-count="51">51</div><span>automated tests; 32 drive the API end to end</span></div>
+      <div class="card tile reveal" style="--d:.08s"><span class="ico"><svg class="i"><use href="#i-shield"/></svg></span><div class="big">10/10</div><span>deliberately broken safeguards caught</span></div>
+      <div class="card tile reveal" style="--d:.16s"><span class="ico"><svg class="i"><use href="#i-box"/></svg></span><div class="big" data-count="4">4</div><span>CI jobs, incl. a Docker + PostgreSQL smoke test</span></div>
+      <div class="card tile reveal" style="--d:.24s"><span class="ico"><svg class="i"><use href="#i-flag"/></svg></span><div class="big" data-count="3">3</div><span>flaws in my own benchmark, found and disclosed</span></div>
+    </div>
+    <div class="limits reveal">
+      <b>Honest limits</b>
+      <div class="row"><span class="chip warn">Synthetic data only</span><span class="chip warn">Hand-set weights</span><span class="chip warn">~50 place names</span><span class="chip warn">No real-world accuracy claim</span></div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer><div class="wrap">
   <p id="disclaimer"></p>
-  <p>Source and documentation: <a href="https://github.com/GopikaJaideep/TraceAI">github.com/GopikaJaideep/TraceAI</a>. Map data © OpenStreetMap contributors.</p>
+  <p>Source and documentation: <a href="https://github.com/GopikaJaideep/TraceAI" style="color:var(--cur)">github.com/GopikaJaideep/TraceAI</a>. Map data © OpenStreetMap contributors.</p>
 </div></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -256,66 +512,96 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
 (function () {
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const tier = (s) => (s >= 0.6 ? "hi" : s >= 0.4 ? "mid" : "lo");
   const COLOURS = { hi: "#c2410c", mid: "#b45309", lo: "#64748b" };
   const LABELS = { image: "Face match", description: "Description", proximity: "Proximity", recency: "Recency", credibility: "Credibility" };
   const AVATARS = ["#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f"];
-  let DATA, map, layer, current, selected;
+  let DATA, map, layer, current, markers = [], defaultBounds, zoomedOut = false;
 
-  fetch("eval.json").then((r) => r.json()).then(renderEval)
-    .catch(() => { $("evalBox").replaceChildren(el("p", "meta", "Results could not be loaded.")); });
+  /* ---------- scroll reveal, counters, progress bar, nav colour ---------- */
+  const io = "IntersectionObserver" in window;
+  const revealIO = io ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); } }), { threshold: 0.12 }) : null;
+  const reveal = (n) => (revealIO ? revealIO.observe(n) : n.classList.add("in"));
+  document.querySelectorAll(".reveal").forEach(reveal);
 
-  function renderEval(E) {
-    const box = $("evalBox"); box.replaceChildren();
-    ["standard", "hard"].filter((k) => E.settings[k]).forEach((key) => {
-      const S = E.settings[key];
-      box.append(el("h3", null, key === "standard" ? "Standard setting" : "Hard setting"), el("p", "meta", E.setting_notes[key]));
-      const wrap = el("div", "panel scroll"), t = el("table"), head = el("thead"), hr = el("tr");
-      ["Ranking method", "Precision@3", "Top-1 correct", "MRR", "AUROC"].forEach((h, i) => hr.append(el("th", i ? "num" : null, h)));
-      head.append(hr); t.append(head);
-      const body = el("tbody");
-      Object.keys(E.labels).forEach((name) => {
-        const m = S.metrics[name], tr = el("tr", name === "full" ? "full" : null);
-        tr.append(el("td", null, E.labels[name]),
-          el("td", "num", m["p@3"].mean.toFixed(2) + " ± " + m["p@3"].sd.toFixed(2)),
-          el("td", "num", m["hit@1"].mean.toFixed(2)), el("td", "num", m.mrr.mean.toFixed(2)), el("td", "num", m.auroc.mean.toFixed(2)));
-        body.append(tr);
-      });
-      t.append(body); wrap.append(t); box.append(wrap);
-      box.append(el("p", "meta", S.cases + " cases · " + S.sightings_ranked_per_case + " sightings ranked per case · face model " + E.face_model));
+  function countUp(node) {
+    const to = +node.dataset.count;
+    if (REDUCED) { node.textContent = to; return; }
+    const t0 = performance.now(), dur = 900;
+    (function step(t) { const p = Math.min(1, (t - t0) / dur); node.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(t0);
+  }
+  if (io) {
+    const cio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); } }), { threshold: 0.6 });
+    document.querySelectorAll("[data-count]").forEach((n) => { if (!REDUCED) n.textContent = "0"; cio.observe(n); });  // start at 0 so the count-up has no flash of the final value
+    const links = [...document.querySelectorAll(".nav nav a[href^='#']")];
+    const sio = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      links.forEach((a) => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id));
+      document.documentElement.style.setProperty("--cur", getComputedStyle(e.target).getPropertyValue("--accent"));
+    }), { rootMargin: "-45% 0px -50% 0px" });
+    document.querySelectorAll("main section[id]").forEach((s) => sio.observe(s));
+  }
+  const bar = $("progress"); let ticking = false;
+  addEventListener("scroll", () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => { const h = document.documentElement; bar.style.width = (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)) * 100 + "%"; ticking = false; });
+  }, { passive: true });
+
+  /* ---------- results chart ---------- */
+  const SETTINGS = [
+    { key: "photo_rate_20", tab: "20% of tips have a photo", note: "Closest to real life", cls: "good" },
+    { key: "photo_rate_50", tab: "50%", note: "Half the tips have a photo", cls: "good" },
+    { key: "photo_rate_100", tab: "100%", note: "A ceiling: synthetic faces are easy", cls: "" },
+    { key: "standard", tab: "Easy setting", note: "Text alone nearly solves it", cls: "" },
+    { key: "hard", tab: "Biased setting", note: "Inflated: every decoy has a photo, but one true tip per person doesn't", cls: "warn" },
+  ];
+  let EVAL;
+
+  fetch("eval.json").then((r) => r.json()).then((E) => {
+    EVAL = E;
+    const avail = SETTINGS.filter((s) => E.settings[s.key]);
+    const seg = $("seg");
+    avail.forEach((s) => {
+      const b = el("button", null, s.tab); b.type = "button"; b.dataset.key = s.key; b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", () => drawChart(s.key)); seg.append(b);
     });
-    // Sensitivity to photo availability: one compact table across the photo-rate settings.
-    const rates = Object.keys(E.settings).filter((k) => k.startsWith("photo_rate_"))
-      .sort((a, b) => E.settings[a].photo_rate - E.settings[b].photo_rate);
-    if (rates.length) {
-      box.append(el("h3", null, "How much does it depend on photos?"),
-        el("p", "meta", "Look-alike decoys as in the hard setting, but every tip, true or decoy, keeps its photo with the probability shown, independent of its label. Precision@3, mean ± spread across cases."));
-      const wrap = el("div", "panel scroll"), t = el("table"), head = el("thead"), hr = el("tr");
-      ["Tips with a photo", "Text only (no face)", "Face only", "All signals fused", "Fused: top-1 correct"].forEach((h, i) => hr.append(el("th", i ? "num" : null, h)));
-      head.append(hr); t.append(head);
-      const body = el("tbody");
-      rates.forEach((k) => {
-        const S = E.settings[k], m = S.metrics, f = (n) => m[n]["p@3"].mean.toFixed(2) + " ± " + m[n]["p@3"].sd.toFixed(2);
-        const tr = el("tr");
-        tr.append(el("td", null, Math.round(S.photo_rate * 100) + "%"), el("td", "num", f("context")), el("td", "num", f("face")),
-          el("td", "num", f("full")), el("td", "num", m.full["hit@1"].mean.toFixed(2)));
-        body.append(tr);
-      });
-      t.append(body); wrap.append(t); box.append(wrap);
-    }
-    box.append(el("h3", null, "Caveats"));
-    const ul = el("ul"); E.caveats.forEach((c) => ul.append(el("li", null, c))); box.append(ul);
+    const ul = $("cavList"); E.caveats.forEach((c) => ul.append(el("li", null, c)));
+    drawChart(avail[0].key);
+  }).catch(() => { $("chart").replaceChildren(el("p", "meta", "Results could not be loaded.")); });
+
+  function drawChart(key) {
+    const S = EVAL.settings[key], cfg = SETTINGS.find((s) => s.key === key);
+    document.querySelectorAll("#seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.key === key)));
+    const m = S.metrics, p3 = (n) => m[n]["p@3"].mean;
+    const best = Math.max(p3("proximity"), p3("context"), p3("face"));
+    $("tkFused").textContent = p3("full").toFixed(2);
+    $("tkBest").textContent = best.toFixed(2);
+    const rn = $("rnote"); rn.textContent = cfg.note; rn.className = "chip " + cfg.cls;
+    const chart = $("chart"); chart.replaceChildren();
+    Object.keys(EVAL.labels).forEach((name) => {
+      const v = m[name]["p@3"], row = el("div", "crow" + (name === "full" ? " full" : name === "random" ? " rand" : ""));
+      row.title = "Precision@3 " + v.mean.toFixed(2) + " ± " + v.sd.toFixed(2) + " (mean ± spread across " + S.cases + " cases)";
+      row.append(el("div", "clabel", EVAL.labels[name].replace(" (expected value)", "")));
+      const plot = el("div", "plot"); plot.style.setProperty("--w", Math.max(0.6, v.mean * 100) + "%");
+      const val = el("div", "cval", v.mean.toFixed(2) + " "); val.append(el("small", null, "±" + v.sd.toFixed(2)));
+      plot.append(el("div", "cbar"), val); row.append(plot); chart.append(row);
+    });
   }
 
-  fetch("demo.json").then((r) => r.json()).then((d) => { DATA = d; init(); })
-    .catch(() => { $("demo").append(el("p", "meta", "The demo data could not be loaded. Please try refreshing the page.")); });
+  /* ---------- scoring helpers ---------- */
+  function ring(score) {
+    const C = 2 * Math.PI * 18, t = tier(score), d = el("div");
+    d.innerHTML = '<svg class="ring ' + t + '" viewBox="0 0 44 44" role="img" aria-label="Score ' + score.toFixed(2) + '"><circle class="rt" cx="22" cy="22" r="18"/><circle class="arc" cx="22" cy="22" r="18" style="--len:' + (score * C).toFixed(1) + '"/><text x="22" y="26.5">' + score.toFixed(2) + "</text></svg>";
+    return d.firstChild;
+  }
 
-  function bars(components, weights) {
+  function bars(components) {
     const box = el("div", "bars");
     Object.keys(LABELS).forEach((k) => {
       const row = el("div", "bar"); row.append(el("span", null, LABELS[k]));
       const v = components[k];
-      if (v == null) { row.append(el("span", "na", "not available: weight redistributed")); }
+      if (v == null) { const na = el("span", "na", "n/a"); na.title = "Not available: its weight is shared among the other signals"; row.append(na); }
       else {
         const t = el("div", "track"), f = el("div", "fill"); f.style.width = Math.round(v * 100) + "%"; t.append(f);
         row.append(t, el("span", null, v.toFixed(2)));
@@ -328,7 +614,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   function equation(components, score, notes) {
     const w = DATA.weights, avail = Object.keys(w).filter((k) => components[k] != null);
     const hard = score === 0 && notes.some((n) => /plausible|predates/.test(n));
-    if (hard) return "Hard rule: " + notes.find((n) => /plausible|predates/.test(n)) + ", so the lead scores 0 whatever the other signals say.";
+    if (hard) return "Hard rule: " + notes.find((n) => /plausible|predates/.test(n)) + ", so the score is 0.";
     const total = avail.reduce((a, k) => a + w[k], 0);
     const weighted = avail.reduce((a, k) => a + w[k] * components[k], 0) / total;
     const ident = ["image", "description"].filter((k) => components[k] != null).map((k) => components[k]);
@@ -336,26 +622,31 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
     return "Weighted average " + weighted.toFixed(2) + " × identity factor " + f.toFixed(2) + " = " + (weighted * f).toFixed(2);
   }
 
+  /* ---------- demo + scoring cards ---------- */
+  fetch("demo.json").then((r) => r.json()).then((d) => { DATA = d; init(); })
+    .catch(() => { $("demo").append(el("p", "meta", "The demo data could not be loaded. Please try refreshing the page.")); });
+
   function init() {
     $("disclaimer").textContent = DATA.disclaimer;
-    const w = DATA.weights;
-    $("formula").textContent = "Each signal is scored 0 to 1 and combined as a weighted average (face " + w.image + ", description " + w.description +
-      ", proximity " + w.proximity + ", recency " + w.recency + ", credibility " + w.credibility + "). Signals a report cannot provide are dropped and the rest renormalised. The result is then scaled by an identity factor of " +
-      DATA.identity_floor + " + " + (1 - DATA.identity_floor).toFixed(1) + " × the strongest identity evidence (face or description), so a well-located report about someone else cannot rank like a match. Physically impossible journeys and sightings before the last-known time are set to 0.";
+    const w = DATA.weights, shades = [100, 78, 60, 46, 34], keys = Object.keys(LABELS);
+    keys.forEach((k, i) => {
+      const seg = el("span"); seg.style.flex = String(w[k]); seg.style.background = "color-mix(in srgb,var(--accent) " + shades[i] + "%,var(--surface))"; seg.title = LABELS[k]; $("wbar").append(seg);
+      const li = el("span"); const sw = el("i"); sw.style.background = seg.style.background; li.append(sw, document.createTextNode(LABELS[k] + " " + Math.round(w[k] * 100) + "%")); $("wleg").append(li);
+    });
 
-    DATA.scenarios.forEach((s) => {
-      const c = el("article", "panel card"), h = el("header");
-      h.append(el("h3", null, s.title), el("span", "pill " + tier(s.score), s.score.toFixed(2)));
+    DATA.scenarios.forEach((s, idx) => {
+      const c = el("article", "card scard reveal"); c.style.setProperty("--d", (idx % 4) * 0.07 + "s");
+      const h = el("header"); h.append(ring(s.score), el("h3", null, s.title));
       c.append(h, el("p", "quote", "“" + s.text + "”"));
-      const chips = el("div", "chips");
-      const ex = s.extracted;
-      if (ex.place) chips.append(el("span", "tag", "place: " + ex.place));
-      ex.clothing.forEach((x) => chips.append(el("span", "tag", "clothing: " + x)));
-      if (ex.seen_at) chips.append(el("span", "tag", "time: " + ex.seen_at.slice(11, 16)));
+      const chips = el("div"), ex = s.extracted;
+      if (ex.place) chips.append(el("span", "tag", ex.place));
+      ex.clothing.forEach((x) => chips.append(el("span", "tag", x)));
+      if (ex.seen_at) chips.append(el("span", "tag", ex.seen_at.slice(11, 16)));
       if (ex.hedges) chips.append(el("span", "tag flag", "hedging ×" + ex.hedges));
-      chips.append(el("span", "tag", s.face_cosine == null ? "no photo" : "face cosine " + s.face_cosine.toFixed(2)));
-      c.append(chips, bars(s.components), el("div", "eq", equation(s.components, s.score, s.notes)), el("p", "why", s.why));
-      $("cards").append(c);
+      chips.append(el("span", "tag", s.face_cosine == null ? "no photo" : "face " + s.face_cosine.toFixed(2)));
+      const more = el("details", "more"); more.append(el("summary", null, "How it was scored"), el("p", null, equation(s.components, s.score, s.notes)), el("p", null, s.why));
+      c.append(chips, bars(s.components), more);
+      $("cards").append(c); reveal(c);
     });
 
     const sel = $("caseSel");
@@ -368,26 +659,25 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
   }
 
   function showCase(i) {
-    current = DATA.cases[i]; selected = null;
+    current = DATA.cases[i];
     const av = $("avatar"); av.style.background = AVATARS[i % AVATARS.length]; av.textContent = current.label.slice(-1);
-    $("caseMeta").textContent = "Last seen " + current.last_place + ", " + current.last_seen.slice(0, 10) + " · " + current.clothing.join(", ");
+    $("caseMeta").textContent = "Last seen " + current.last_place + " · " + current.clothing.join(", ");
     const cor = $("corridor");
-    cor.hidden = !current.corridor; if (current.corridor) cor.textContent = "Inferred movement corridor: " + current.corridor;
+    cor.hidden = !current.corridor; if (current.corridor) cor.textContent = "Corridor: " + current.corridor;
     const list = $("leads"); list.replaceChildren();
-    $("leadCount").textContent = current.leads.length + " above 0.15";
+    $("leadCount").textContent = current.leads.length + " leads";
     current.leads.forEach((l, idx) => {
       const b = el("button", "lead-item"); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.dataset.i = idx;
       b.append(el("span", "pill " + tier(l.score), l.score.toFixed(2)));
-      const t = el("span"); t.append(el("div", "t", l.text.length > 92 ? l.text.slice(0, 90) + "…" : l.text),
+      const t = el("span"); t.append(el("div", "t", l.text.length > 80 ? l.text.slice(0, 78) + "…" : l.text),
         el("div", "p", (l.place || "place unresolved") + (l.has_photo ? " · photo" : "") + (l.flagged ? " · flagged" : "")));
       b.append(t); b.addEventListener("click", () => select(idx)); list.append(b);
     });
     drawMap(); select(current.leads.length ? 0 : null);
   }
 
-  let markers = [];
   function drawMap() {
-    layer.clearLayers(); markers = [];
+    layer.clearLayers(); markers = []; zoomedOut = false;
     const pts = [[current.lat, current.lng]];
     L.circleMarker([current.lat, current.lng], { radius: 9, color: "#111", weight: 3, fillColor: "#fff", fillOpacity: 1 }).bindTooltip("Last known: " + current.last_place).addTo(layer);
     current.clusters.filter((c) => c.size >= 2).forEach((c) => L.circle([c.lat, c.lng], { radius: 1500, color: "#7c3aed", weight: 1.5, fill: false, dashArray: "4 4" }).addTo(layer));
@@ -396,24 +686,35 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);f
       const t = tier(l.score);
       const m = L.circleMarker([l.lat, l.lng], { radius: 6 + 10 * l.score, color: l.flagged ? "#64748b" : COLOURS[t], weight: l.flagged ? 3 : 1, fillColor: COLOURS[t], fillOpacity: 0.55 })
         .bindTooltip(l.score.toFixed(2) + " · " + (l.place || "unresolved")).addTo(layer);
-      m.on("click", () => select(idx)); markers[idx] = m; pts.push([l.lat, l.lng]);
+      m.on("click", () => select(idx)); markers[idx] = m;
+      if (l.score >= 0.3) pts.push([l.lat, l.lng]);  // frame the strong leads; a far-off weak one should not zoom the map out
     });
-    map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 14 });
+    if (pts.length < 2) current.leads.forEach((l) => { if (l.lat != null) pts.push([l.lat, l.lng]); });
+    defaultBounds = L.latLngBounds(pts).pad(0.25);
+    map.fitBounds(defaultBounds, { maxZoom: 14, animate: false });
     setTimeout(() => map.invalidateSize(), 50);
   }
 
   function select(idx) {
-    selected = idx;
     document.querySelectorAll(".lead-item").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === idx)));
     markers.forEach((m, i) => { if (m) m.setStyle({ weight: i === idx ? 4 : (current.leads[i].flagged ? 3 : 1), color: i === idx ? "#111" : (current.leads[i].flagged ? "#64748b" : COLOURS[tier(current.leads[i].score)]) }); });
     const d = $("detail"); d.replaceChildren();
     if (idx == null) { d.append(el("p", "meta", "No leads for this case.")); return; }
     const l = current.leads[idx];
     d.append(el("h3", null, "Why " + l.score.toFixed(2) + "?"), el("p", "quote", "“" + l.text + "”"));
-    if (l.flagged) d.append(el("p", "tag flag", "Flagged: repeat source or duplicate text, so a reviewer should be extra careful"));
+    if (l.flagged) d.append(el("p", "tag flag", "Flagged: repeat source or duplicate text"));
     d.append(bars(l.components), el("div", "eq", equation(l.components, l.score, l.notes)));
     l.notes.forEach((n) => d.append(el("div", "meta", "· " + n)));
-    if (markers[idx]) markers[idx].openTooltip();
+    const m = markers[idx];
+    if (m) {
+      const ll = m.getLatLng();
+      if (!map.getBounds().contains(ll)) {  // a weak lead can sit outside the default framing: show it with the last-known place
+        map.fitBounds(L.latLngBounds([[current.lat, current.lng], ll]).pad(0.25), { maxZoom: 14 }); zoomedOut = true;
+      } else if (zoomedOut && defaultBounds.contains(ll)) {  // back to a strong lead: restore the default framing
+        map.fitBounds(defaultBounds, { maxZoom: 14 }); zoomedOut = false;
+      }
+      m.openTooltip();
+    }
   }
 })();
 </script>
